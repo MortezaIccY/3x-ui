@@ -1,0 +1,34 @@
+<?php
+
+namespace XUI\Xray\Outbound\Protocols\Dns;
+
+use JSON\json;
+use XUI\Xray\Outbound\Protocols\Dns\Settings;
+
+class Dns
+{
+    public string $protocol = 'dns';
+    public Settings $settings;
+
+    public function __construct(string $settings = null)
+    {
+        if (!is_null($settings)):
+            $settings = json::_in($settings, true);
+            $this->settings = new Settings($settings['network'], $settings['address'], $settings['port'], $settings['nonIPQuery']);
+        endif;
+    }
+
+    public function generate(
+        Settings $settings
+    ): void
+    {
+        $this->settings = $settings;
+    }
+
+    public function modify(
+        Settings $settings = null
+    ): void
+    {
+        if (!is_null($settings)) $this->settings = $settings;
+    }
+}
