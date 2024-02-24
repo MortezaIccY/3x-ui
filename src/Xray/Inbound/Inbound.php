@@ -58,7 +58,7 @@ class Inbound
             'total' => $total_traffic,
             'remark' => $remark,
             'enable' => $enable,
-            'expiryTime' => $expiry_time . '000',
+            'expiryTime' => $expiry_time * 1000,
             'listen' => $config->listen,
             'port' => $config->port,
             'protocol' => $config->protocol,
@@ -216,7 +216,7 @@ class Inbound
                         if ($protocol == $inbound_protocol) {
                             $remark = (is_null($remark)) ? $inbound->remark : $remark;
                             $total_traffic = (is_null($total_traffic)) ? $inbound->total : $total_traffic;
-                            $expiry_time = (is_null($expiry_time)) ? $inbound->expiryTime : $expiry_time . '000';
+                            $expiry_time = (is_null($expiry_time)) ? $inbound->expiryTime : $expiry_time * 1000;
                             $download = (is_null($download)) ? $inbound->down : $download;
                             $upload = (is_null($upload)) ? $inbound->up : $upload;
                             $enable = (is_null($enable)) ? $inbound->enable : $enable;

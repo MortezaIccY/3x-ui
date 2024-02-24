@@ -32,7 +32,7 @@ class Settings
             'flow' => $flow,
             'limitIp' => $limit_ip,
             'totalGB' => $total_traffic,
-            'expiryTime' => $expiry_time . '000',
+            'expiryTime' => $expiry_time * 1000,
             'enable' => $enable,
             'tgId' => $tgid,
             'subId' => $subid,
@@ -53,7 +53,7 @@ class Settings
                 if (!is_null($email)) $client['email'] = $email;
                 if (!is_null($enable)) $client['enable'] = $enable;
                 if (!is_null($total_traffic)) $client['totalGB'] = $total_traffic;
-                if (!is_null($expiry_time)) $client['expiryTime'] = $expiry_time . '000';
+                if (!is_null($expiry_time)) $client['expiryTime'] = $expiry_time * 1000;
                 if (!is_null($limit_ip)) $client['limitIp'] = $limit_ip;
                 if (!is_null($flow)) $client['flow'] = $flow;
                 if (!is_null($tgid)) $client['tgId'] = $tgid;

@@ -4,13 +4,10 @@ namespace XUI;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\FileCookieJar;
-use GuzzleHttp\Cookie\SessionCookieJar;
 use GuzzleHttp\Exception\GuzzleException;
 use JSON\json;
 use XUI\Panel\panel;
 use XUI\Server\server;
-use XUI\Xray\Inbound;
-use XUI\Xray\Outbond;
 use XUI\Xray\xray;
 
 require_once 'vendor/autoload.php';
@@ -42,7 +39,7 @@ class Xui
         $xui_port,
         $xui_uri_path = '/',
         $has_ssl = false,
-        $cookie_file = null,
+        $cookie_dir = null,
         $timeout = 5,
         $proxy = null,
         $output = self::OUTPUT_OBJECT,
@@ -57,12 +54,12 @@ class Xui
             $this->address = 'https://' . $this->host . ':' . $this->port . $this->uri_path;
         else
             $this->address = 'http://' . $this->host . ':' . $this->port . $this->uri_path;
-        $cookie_file = (is_null($cookie_file)) ? __DIR__ . "/../$xui_host.cookie" : $cookie_file;
+        $cookie_dir = (is_null($cookie_dir)) ? "$xui_host.cookie" : $cookie_dir . "/$xui_host.cookie";
         $this->guzzle = new Client([
             'base_uri' => $this->address,
             'timeout' => $timeout,
             'proxy' => $proxy,
-            'cookies' => new FileCookieJar($cookie_file, true)
+            'cookies' => new FileCookieJar($cookie_dir, true)
         ]);
         $this->output = $output;
         $this->response_output = $response_output;
@@ -115,7 +112,42 @@ class Xui
             return false;
         }
     }
+    public static function random(int $length = 32): string
+    {
+        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $out = '';
+        for ($i = 1; $i <= $length; $i++) :
+            $out .= $chars[rand(0, strlen($chars) - 1)];
+        endfor;
+        return $out;
+    }
 
+    public static function uuid(): string
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            // 32 bits for "time_low"
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+
+            // 16 bits for "time_mid"
+            mt_rand(0, 0xffff),
+
+            // 16 bits for "time_hi_and_version",
+            // four most significant bits holds version number 4
+            mt_rand(0, 0x0fff) | 0x4000,
+
+            // 16 bits, 8 bits for "clk_seq_hi_res",
+            // 8 bits for "clk_seq_low",
+            // two most significant bits holds zero and one for variant DCE1.1
+            mt_rand(0, 0x3fff) | 0x8000,
+
+            // 48 bits for "node"
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
+        );
+    }
     private function output(array $data)
     {
         switch ($this->output):
