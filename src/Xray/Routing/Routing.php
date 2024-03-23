@@ -15,6 +15,7 @@ class Routing
     public string $domain_strategy;
     public string $domain_matcher;
     public array $rules;
+    public array $reverses;
     public array $balancers;
     public const OUTPUT_JSON = 111;
     public const OUTPUT_OBJECT = 112;
@@ -202,9 +203,25 @@ class Routing
         } else {
             $return = ['ok' => false, 'error_code' => 404, 'error' => 'routing not found'];
         }
-        return $return;
+        return $this->output($return);
     }
 
+    public function has_rule(string|array $rule_inbound_tag, string $rule_outbound_tag): bool
+    {
+        $rule_inbound_tag = (is_string($rule_inbound_tag)) ? [$rule_inbound_tag] : $rule_inbound_tag;
+        $return = false;
+        foreach ($this->rules as $rule):
+            $is_same = true;
+            foreach ($rule_inbound_tag as $a_inbound_tag):
+                if (!in_array($a_inbound_tag, $rule['inboundTag'])) $is_same = false;
+            endforeach;
+            if ($rule_outbound_tag == $rule['outboundTag'] && $is_same):
+                $return = true;
+                break;
+            endif;
+        endforeach;
+        return $return;
+    }
     private function output(array $data)
     {
         switch ($this->output):

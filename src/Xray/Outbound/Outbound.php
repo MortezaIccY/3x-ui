@@ -116,6 +116,25 @@ class Outbound
         return $this->output($return);
     }
 
+    public function exist(string $outbound_tag): bool
+    {
+        $xray = new Xray($this->guzzle, Xray::OUTPUT_ARRAY, Xray::OUTPUT_ARRAY);
+        $xray_outbounds = $xray->get_config('outbounds');
+        if ($xray_outbounds['ok']) {
+            $xray_outbounds = $xray_outbounds['response'];
+            $exist = false;
+            foreach ($xray_outbounds as $outbound):
+                if ($outbound['tag'] == $outbound_tag):
+                    $exist = true;
+                    break;
+                endif;
+            endforeach;
+        } else {
+            $exist = false;
+        }
+        return $exist;
+    }
+
     public function update(
         string $outbound_tag, string $tag = null, Vmess|Vless|Trojan|Shadowsocks|Socks|Http|Freedom|Dns|Blackhole $config = null,
         array  $proxy_settings = null, string $send_through = null, array $mux = null
@@ -151,9 +170,9 @@ class Outbound
                         'proxySettings' => $proxy_settings,
                         'mux' => $mux
                     ];
-                    if(!is_null($proxy_settings)) $outbound['proxySettings'] = $proxy_settings;
-                    if(!is_null($send_through)) $outbound['sendThrough'] = $send_through;
-                    if(!is_null($mux)) $outbound['mux'] = $mux;
+                    if (!is_null($proxy_settings)) $outbound['proxySettings'] = $proxy_settings;
+                    if (!is_null($send_through)) $outbound['sendThrough'] = $send_through;
+                    if (!is_null($mux)) $outbound['mux'] = $mux;
                     $xray_outbounds[$key] = $outbound;
                     $updated = true;
                     break;

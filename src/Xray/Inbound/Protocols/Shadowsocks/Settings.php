@@ -10,6 +10,7 @@ class Settings
     public array $clients;
     public string $password;
     public string $method;
+    public string $email;
     public string $network;
     public const NETWORK_TCP_UDP = 'tcp,udp';
     public const NETWORK_TCP = 'tcp';
@@ -26,12 +27,13 @@ class Settings
     public const METHOD_none = 'none';
     public const METHOD_plain = 'plain';
 
-    public function __construct(array $clients = [], string $password = null, string $method = self::METHOD_aes_128_gcm, string $network = self::NETWORK_TCP_UDP)
+    public function __construct(array $clients = [], string $password = null, string $method = self::METHOD_aes_128_gcm,string $email=null, string $network = self::NETWORK_TCP_UDP)
     {
         $password = (is_null($password)) ? self::random() : $password;
         $this->clients = $clients;
         $this->password = $password;
         $this->method = $method;
+        $this->email = (is_null($email)) ? self::random(8) : $email;
         $this->network = $network;
     }
 
@@ -91,6 +93,18 @@ class Settings
         foreach ($this->clients as $key => $client):
             if ($client['email'] == $client_email):
                 $return = $this->clients[$key];
+                break;
+            endif;
+        endforeach;
+        return $return;
+    }
+
+    public function has_client(string $client_email): bool
+    {
+        $return = false;
+        foreach ($this->clients as $client):
+            if ($client['email'] == $client_email):
+                $return = true;
                 break;
             endif;
         endforeach;

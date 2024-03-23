@@ -5,8 +5,8 @@ namespace XUI\Xray;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use JSON\json;
+use XUI\Xray\Reverse\Reverse;
 use XUI\Xray\Routing\Routing;
-use XUI\Xray\Settings;
 use XUI\Xray\Inbound\Inbound;
 use XUI\Xray\Outbound\Outbound;
 
@@ -18,6 +18,7 @@ class Xray
     public Inbound $inbound;
     public Outbound $outbound;
     public Routing $routing;
+    public Reverse $reverse;
     public const OUTPUT_JSON = 111;
     public const OUTPUT_OBJECT = 112;
     public const OUTPUT_ARRAY = 113;
@@ -35,6 +36,7 @@ class Xray
         $this->inbound = new Inbound($this->guzzle, $this->output, $this->response_output);
         $this->outbound = new Outbound($this->guzzle, $this->output, $this->response_output);
         $this->routing = new Routing($this->guzzle, $this->output, $this->response_output);
+        $this->reverse = new Reverse($this->guzzle, $this->output, $this->response_output);
     }
 
     /**

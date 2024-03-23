@@ -57,6 +57,18 @@ class Settings
         return $return;
     }
 
+    public function has_user(string $user_username): bool
+    {
+        $return = false;
+        foreach ($this->users as $user):
+            if ($user['username'] == $user_username):
+                $return = true;
+                break;
+            endif;
+        endforeach;
+        return $return;
+    }
+
     public function remove_user(string $user_username): bool
     {
         $removed = false;

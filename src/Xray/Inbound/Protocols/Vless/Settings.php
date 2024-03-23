@@ -79,6 +79,18 @@ class Settings
         return $return;
     }
 
+    public function has_client(string $client_uuid): bool
+    {
+        $return = false;
+        foreach ($this->clients as $client):
+            if ($client['id'] == $client_uuid):
+                $return = true;
+                break;
+            endif;
+        endforeach;
+        return $return;
+    }
+
     public function remove_client(string $client_uuid): bool
     {
         $removed = false;

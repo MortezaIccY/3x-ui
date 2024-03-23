@@ -42,25 +42,17 @@ class StreamSettings
      * @link https://xtls.github.io/en/config/transport.html#tlsobject
      */
     public function tls_settings(
-        string $server_name, bool $reject_unknown_sni, bool $allow_insecure, array $alpn, string $min_version, string $max_version,
-        string $cipher_suites, array $certificates, bool $disable_system_root, bool $enable_session_resumption, string $fingerprint,
-        array  $pinned_peer_certificate_chain_sha256
+        string $server_name, bool $allow_insecure = false, array $alpn = ['h2', 'http/1.1'], string $fingerprint = 'chrome',
+        bool   $show = false
     ): void
     {
         $this->security = 'tls';
         $this->tls_settings = [
             'serverName' => $server_name,
-            'rejectUnknownSni' => $reject_unknown_sni,
             'allowInsecure' => $allow_insecure,
             'alpn' => $alpn,
-            'minVersion' => $min_version,
-            'maxVersion' => $max_version,
-            'cipherSuites' => $cipher_suites,
-            'certificates' => json::_out($certificates),
-            'disableSystemRoot' => $disable_system_root,
-            'enableSessionResumption' => $enable_session_resumption,
             'fingerprint' => $fingerprint,
-            'pinnedPeerCertificateChainSha256' => $pinned_peer_certificate_chain_sha256
+            'show' => $show
         ];
         $this->reality_settings = [];
     }
@@ -117,11 +109,11 @@ class StreamSettings
         $this->kcp_settings = [
             'mtu' => $mtu,
             'tti' => $tti,
-            'uplink_capacity' => $uplink_capacity,
-            'down_link_capacity' => $down_link_capacity,
+            'uplinkCapacity' => $uplink_capacity,
+            'downlinkCapacity' => $down_link_capacity,
             'congestion' => $congestion,
-            'read_buffer_size' => $read_buffer_size,
-            'write_buffer_size' => $write_buffer_size,
+            'readBufferSize' => $read_buffer_size,
+            'writeBufferSize' => $write_buffer_size,
             'header' => [
                 'type' => $header_type
             ],
@@ -242,7 +234,7 @@ class StreamSettings
      * @link https://xtls.github.io/en/config/transports/grpc.html#grpcobject
      */
     public function grpc_settings(
-        string $service_name = null, bool $multi_mode = false, int $idle_timeout = null, int $health_check_timeout = 20,
+        string $service_name = null, bool $multi_mode = false, int $idle_timeout = 60, int $health_check_timeout = 20,
         bool   $permit_without_stream = false, int $initial_windows_size = 0
     ): void
     {

@@ -123,11 +123,11 @@ class StreamSettings
         $this->kcp_settings = [
             'mtu' => $mtu,
             'tti' => $tti,
-            'uplink_capacity' => $uplink_capacity,
-            'down_link_capacity' => $down_link_capacity,
+            'uplinkCapacity' => $uplink_capacity,
+            'downLinkCapacity' => $down_link_capacity,
             'congestion' => $congestion,
-            'read_buffer_size' => $read_buffer_size,
-            'write_buffer_size' => $write_buffer_size,
+            'readBufferSize' => $read_buffer_size,
+            'writeBufferSize' => $write_buffer_size,
             'header' => [
                 'type' => $header_type
             ],
@@ -248,7 +248,7 @@ class StreamSettings
      * @link https://xtls.github.io/en/config/transports/grpc.html#grpcobject
      */
     public function grpc_settings(
-        string $service_name = null, bool $multi_mode = false, int $idle_timeout = null, int $health_check_timeout = 20,
+        string $service_name = null, bool $multi_mode = false, int $idle_timeout = 60, int $health_check_timeout = 20,
         bool   $permit_without_stream = false, int $initial_windows_size = 0
     ): void
     {

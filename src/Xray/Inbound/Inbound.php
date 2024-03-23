@@ -47,7 +47,7 @@ class Inbound
      */
     public function add(
         Vmess|Vless|Trojan|Shadowsocks|Socks|Http|DokodemoDoor $config, string $remark = null, int $total_traffic = 0,
-        int|string                                             $expiry_time = '', int $download = 0, int $upload = 0, bool $enable = true
+        int|string                                             $expiry_time = 0, int $download = 0, int $upload = 0, bool $enable = true
     ): mixed
     {
         $st = microtime(true);
@@ -98,12 +98,10 @@ class Inbound
     /**
      * Get a list of inbounds
      * @return array|false|mixed|string
-     * @throws GuzzleException
      */
     public function list(): mixed
     {
         $st = microtime(true);
-        $result = $this->guzzle->post('panel/inbound/list');
         try {
             $result = $this->guzzle->post("panel/inbound/list");
             $body = $result->getBody();
@@ -124,7 +122,6 @@ class Inbound
      * Only return inbound in `response`!
      * @param int $inbound_id
      * @return array|false|mixed|string
-     * @throws GuzzleException
      */
     public function get(int $inbound_id): mixed
     {
@@ -176,6 +173,32 @@ class Inbound
         return $this->output($return);
     }
 
+    public function exist(int $inbound_id): bool
+    {
+        $last_output = $this->output;
+        $last_response_output = $this->response_output;
+        $this->output = self::OUTPUT_OBJECT;
+        $this->response_output = self::OUTPUT_OBJECT;
+        $result = $this->list();
+        if ($result->ok) {
+            $response = $result->response;
+            $exist = false;
+            if ($response->success) :
+                $inbounds_list = $response->obj;
+                foreach ($inbounds_list as $inbound):
+                    if ($inbound->id == $inbound_id):
+                        $exist = true;
+                    endif;
+                endforeach;
+            endif;
+        } else {
+            $exist = false;
+        }
+        $this->output = $last_output;
+        $this->response_output = $last_response_output;
+        return $exist;
+    }
+
     /**
      * Update an inbound
      * @param int $inbound_id
@@ -187,7 +210,6 @@ class Inbound
      * @param int|null $upload
      * @param bool|null $enable
      * @return array|false|mixed|string
-     * @throws GuzzleException
      */
     public function update(
         int $inbound_id, Vmess|Vless|Trojan|Shadowsocks|Socks|Http|DokodemoDoor $config = null, string $remark = null,
@@ -320,7 +342,6 @@ class Inbound
      * Only return json encoded exported inbound in `response`!
      * @param int $inbound_id
      * @return mixed
-     * @throws GuzzleException
      */
     public function export(int $inbound_id): mixed
     {
@@ -359,7 +380,6 @@ class Inbound
      * Only json encoded exported inbound accepted!
      * @param string $exported_inbound
      * @return array|false|mixed|string
-     * @throws GuzzleException
      */
     public function import(string $exported_inbound): mixed
     {
@@ -415,6 +435,136 @@ class Inbound
             $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
         }
         return $this->output($return);
+    }
+
+    /**
+     * @param string $address
+     * @param int $port
+     * @param Vmess|Vless|Trojan|Shadowsocks|Socks|Http $inbound_config
+     * @return \XUI\Xray\Outbound\Protocols\Shadowsocks\Shadowsocks|\XUI\Xray\Outbound\Protocols\Socks\Socks|\XUI\Xray\Outbound\Protocols\Trojan\Trojan|\XUI\Xray\Outbound\Protocols\Vless\Vless|\XUI\Xray\Outbound\Protocols\Vmess\Vmess
+     */
+    public static function to_outbound(
+        string $address, int $port, Vmess|Vless|Trojan|Shadowsocks|Socks|Http $inbound_config
+    ): \XUI\Xray\Outbound\Protocols\Trojan\Trojan|\XUI\Xray\Outbound\Protocols\Shadowsocks\Shadowsocks|\XUI\Xray\Outbound\Protocols\Vmess\Vmess|\XUI\Xray\Outbound\Protocols\Vless\Vless|\XUI\Xray\Outbound\Protocols\Socks\Socks
+    {
+        switch ($inbound_config->protocol):
+            case 'vmess':
+                $settings = $inbound_config->settings;
+                $stream = $inbound_config->stream_settings;
+                $config = new \XUI\Xray\Outbound\Protocols\Vmess\Vmess();
+                $config_settings = new \XUI\Xray\Outbound\Protocols\Vmess\Settings($address, $port);
+                $config_settings->add_user($settings->clients[0]['id']);
+            break;
+            case 'vless':
+                $settings = $inbound_config->settings;
+                $stream = $inbound_config->stream_settings;
+                $config = new \XUI\Xray\Outbound\Protocols\Vless\Vless();
+                $config_settings = new \XUI\Xray\Outbound\Protocols\Vless\Settings($address, $port);
+                $config_settings->add_user($settings->clients[0]['id']);
+            break;
+            case 'trojan':
+                $settings = $inbound_config->settings;
+                $stream = $inbound_config->stream_settings;
+                $config = new \XUI\Xray\Outbound\Protocols\Trojan\Trojan();
+                $config_settings = new \XUI\Xray\Outbound\Protocols\Trojan\Settings(
+                    $address, $port, $settings->clients[0]['password'], $settings->clients[0]['email']
+                );
+            break;
+            case 'shadowsocks':
+                $settings = $inbound_config->settings;
+                $stream = $inbound_config->stream_settings;
+                $config = new \XUI\Xray\Outbound\Protocols\Shadowsocks\Shadowsocks();
+                $config_settings = new \XUI\Xray\Outbound\Protocols\Shadowsocks\Settings(
+                    $address, $port, $settings->password, $settings->method, $settings->email
+                );
+            break;
+            case 'socks':
+                $settings = $inbound_config->settings;
+                $config = new \XUI\Xray\Outbound\Protocols\Socks\Socks();
+                $config_settings = new \XUI\Xray\Outbound\Protocols\Socks\Settings($address, $port);
+                $config_settings->add_user($settings->accounts[0]['username'], $settings->accounts[0]['password']);
+            break;
+            case 'http':
+                $settings = $inbound_config->settings;
+                $config_settings = new \XUI\Xray\Outbound\Protocols\Http\Settings($address, $port);
+                $config_settings->add_user($settings->accounts[0]['username'], $settings->accounts[0]['password']);
+            break;
+        endswitch;
+        if (isset($stream)):
+            $config_stream = $config->stream_settings;
+            $config_stream->network = $stream->network;
+            $config_stream->security = $stream->security;
+            switch ($stream->network):
+                case 'tcp':
+                    $config_stream->tcp_settings($stream->tcp_settings['header']['type'], $stream->tcp_settings['header']['request']);
+                break;
+                case 'ws':
+                    $config_stream->ws_settings($stream->ws_settings['acceptProxyProtocol'], $stream->ws_settings['path']);
+                break;
+                case 'kcp':
+                    $config_stream->kcp_settings(
+                        $stream->kcp_settings['header']['type'],
+                        $stream->kcp_settings['seed'],
+                        $stream->kcp_settings['mtu'],
+                        $stream->kcp_settings['tti'],
+                        $stream->kcp_settings['uplinkCapacity'],
+                        $stream->kcp_settings['downLinkCapacity'],
+                        $stream->kcp_settings['congestion'],
+                        $stream->kcp_settings['readBufferSize'],
+                        $stream->kcp_settings['writeBufferSize'],
+                    );
+                break;
+                case 'http':
+                    $config_stream->http_settings(
+                        $stream->http_settings['method'],
+                        $stream->http_settings['path'],
+                        $stream->http_settings['host'],
+                        $stream->http_settings['read_idle_timeout'],
+                        $stream->http_settings['health_check_timeout']
+                    );
+                break;
+                case 'domainsocket':
+                    $config_stream->ds_settings($stream->ds_settings['path'], $stream->ds_settings['abstract'], $stream->ds_settings['padding']);
+                break;
+                case 'quic':
+                    $config_stream->quic_settings($stream->quic_settings['security'], $stream->quic_settings['key'], $stream->quic_settings['header']['type']);
+                break;
+                case 'grpc':
+                    $config_stream->grpc_settings(
+                        $stream->grpc_settings['serviceName'],
+                        $stream->grpc_settings['multiMode'],
+                        $stream->grpc_settings['idle_timeout'],
+                        $stream->grpc_settings['health_check_timeout'],
+                        $stream->grpc_settings['permit_without_stream'],
+                        $stream->grpc_settings['initial_windows_size']
+                    );
+                break;
+            endswitch;
+            switch ($stream->security):
+                case 'none':
+                    $config_stream->security = 'none';
+                break;
+                case 'tls':
+                    $config_stream->tls_settings(
+                        $stream->tls_settings['serverName'],
+                        $stream->tls_settings['allowInsecure'],
+                        $stream->tls_settings['alpn'],
+                        $stream->tls_settings['fingerprint'],
+                    );
+                break;
+                case 'reality':
+                    $config_stream->reality_settings(
+                        $stream->reality_settings['show'],
+                        $stream->reality_settings['settings']['fingerprint'],
+                        $stream->reality_settings['serverNames'][0],
+                        $stream->reality_settings['settings']['publicKey'],
+                        $stream->reality_settings['shortIds'][0],
+                        $stream->reality_settings['settings']['spiderX']
+                    );
+                break;
+            endswitch;
+        endif;
+        return $config;
     }
 
     private function output(array $data)

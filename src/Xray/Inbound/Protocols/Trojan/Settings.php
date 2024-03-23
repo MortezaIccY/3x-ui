@@ -75,6 +75,18 @@ class Settings
         return $return;
     }
 
+    public function has_client(string $client_password): bool
+    {
+        $return = false;
+        foreach ($this->clients as $client):
+            if ($client['password'] == $client_password):
+                $return = true;
+                break;
+            endif;
+        endforeach;
+        return $return;
+    }
+
     public function remove_client(string $client_password): bool
     {
         $removed = false;

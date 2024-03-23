@@ -59,6 +59,17 @@ class Settings
         return $return;
     }
 
+    public function has_account(string $account_username): bool
+    {
+        $return = false;
+        foreach ($this->accounts as $account):
+            if ($account['username'] == $account_username):
+                $return = true;
+                break;
+            endif;
+        endforeach;
+        return $return;
+    }
     public function remove_account(string $account_username): bool
     {
         $removed = false;
