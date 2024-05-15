@@ -33,18 +33,19 @@ class Routing
      * <h4>Must be called before using routing!</h4>
      * @return void
      */
-    public function load(): void
+    public function load(): bool
     {
         $this->xray = new Xray($this->guzzle, Xray::OUTPUT_ARRAY, Xray::OUTPUT_ARRAY);
         $result = $this->xray->get_config('routing');
-        if ($result['ok']) {
+        if ($result['ok'] && !empty($result['response'])) {
             $routing = $result['response'];
             if (isset($routing['domainStrategy'])) $this->domain_strategy = $routing['domainStrategy'];
             if (isset($routing['domainMatcher'])) $this->domain_matcher = $routing['domainMatcher'];
             if (isset($routing['rules'])) $this->rules = $routing['rules'];
             if (isset($routing['balancers'])) $this->balancers = $routing['balancers'];
+            return true;
         } else {
-            throw new \UnexpectedValueException($result['error'], $result['error_code']);
+            return false;
         }
     }
 
@@ -101,7 +102,7 @@ class Routing
         foreach ($this->rules as $rule):
             $is_same = true;
             foreach ($rule_inbound_tag as $a_inbound_tag):
-                if (!in_array($a_inbound_tag, $rule['inboundTag'])) $is_same = false;
+                if (isset($rule['inboundTag']) && !in_array($a_inbound_tag, $rule['inboundTag'])) $is_same = false;
             endforeach;
             if ($rule_outbound_tag == $rule['outboundTag'] && $is_same):
                 $et = microtime(true);
@@ -118,7 +119,7 @@ class Routing
         array|string $inbound_tag = null, string $outbound_tag = null, string $balancer_tag = null, array|string $user = null, string $network = null,
         array|string $protocol = null, string $domain_matcher = null, array|string $domain = null, array|string $ip = null, array|string $port = null,
         array|string $source = null, array|string $source_port = null, string $attrs = null, string $type = 'field'
-    ): bool
+    ): mixed
     {
         $st = microtime(true);
         $rule_inbound_tag = (is_string($rule_inbound_tag)) ? [$rule_inbound_tag] : $rule_inbound_tag;
@@ -126,7 +127,7 @@ class Routing
         foreach ($this->rules as $key => $rule):
             $is_same = true;
             foreach ($rule_inbound_tag as $a_inbound_tag):
-                if (!in_array($a_inbound_tag, $rule['inboundTag'])) $is_same = false;
+                if (isset($rule['inboundTag']) && !in_array($a_inbound_tag, $rule['inboundTag'])) $is_same = false;
             endforeach;
             if ($rule_outbound_tag == $rule['outboundTag'] && $is_same):
                 if (!is_null($inbound_tag)) $rule['inboundTag'] = (is_string($inbound_tag)) ? [$inbound_tag] : $inbound_tag;
@@ -174,7 +175,7 @@ class Routing
         foreach ($this->rules as $key => $rule):
             $is_same = true;
             foreach ($rule_inbound_tag as $a_inbound_tag):
-                if (!in_array($a_inbound_tag, $rule['inboundTag'])) $is_same = false;
+                if (isset($rule['inboundTag']) && !in_array($a_inbound_tag, $rule['inboundTag'])) $is_same = false;
             endforeach;
             if ($rule_outbound_tag == $rule['outboundTag'] && $is_same):
                 unset($this->rules[$key]);
@@ -213,7 +214,7 @@ class Routing
         foreach ($this->rules as $rule):
             $is_same = true;
             foreach ($rule_inbound_tag as $a_inbound_tag):
-                if (!in_array($a_inbound_tag, $rule['inboundTag'])) $is_same = false;
+                if (isset($rule['inboundTag']) && !in_array($a_inbound_tag, $rule['inboundTag'])) $is_same = false;
             endforeach;
             if ($rule_outbound_tag == $rule['outboundTag'] && $is_same):
                 $return = true;
@@ -222,6 +223,7 @@ class Routing
         endforeach;
         return $return;
     }
+
     private function output(array $data)
     {
         switch ($this->output):

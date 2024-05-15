@@ -48,14 +48,14 @@ class Panel
 
     public function get_setting(array|string $setting)
     {
-        $panel_settings = new settings($this->all_settings());
+        $panel_settings = new Settings($this->all_settings());
         return $panel_settings->get($setting);
     }
 
     public function update_setting(array $settings)
     {
         $st = microtime(true);
-        $panel_settings = new settings($this->all_settings());
+        $panel_settings = new Settings($this->all_settings());
         $panel_settings->update($settings);
         try {
             $result = $this->guzzle->post("panel/setting/update", [
@@ -79,6 +79,23 @@ class Panel
         $result = $this->guzzle->post('panel/setting/restartPanel');
         try {
             $result = $this->guzzle->post("panel/setting/restartPanel");
+            $body = $result->getBody();
+            $response = $this->response_output(json::_in($body->getContents(), true));
+            $et = microtime(true);
+            $tt = round($et - $st, 3);
+            $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
+        } catch (GuzzleException $err) {
+            $error_code = $err->getCode();
+            $error = $err->getMessage();
+            $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
+        }
+        return $this->output($return);
+    }
+    public function default_xray_config()
+    {
+        $st = microtime(true);
+        try {
+            $result = $this->guzzle->get("panel/setting/getDefaultJsonConfig");
             $body = $result->getBody();
             $response = $this->response_output(json::_in($body->getContents(), true));
             $et = microtime(true);

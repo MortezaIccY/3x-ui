@@ -25,16 +25,17 @@ class Reverse
         $this->response_output = $response_output;
     }
 
-    public function load(): void
+    public function load(): bool
     {
         $this->xray = new Xray($this->guzzle, Xray::OUTPUT_ARRAY, Xray::OUTPUT_ARRAY);
-        $result = $this->xray->get_config('reverse');
-        if ($result['ok']) {
-            $routing = $result['response'];
-            if (isset($routing['bridges'])) $this->bridges = $routing['bridges'];
-            if (isset($routing['portals'])) $this->portals = $routing['portals'];
+        $result = $this->xray->get_full_config()['response'];
+        if (isset($result['reverse'])) {
+            $reverse = $result['reverse'];
+            if (isset($reverse['bridges'])) $this->bridges = $reverse['bridges'];
+            if (isset($reverse['portals'])) $this->portals = $reverse['portals'];
+            return true;
         } else {
-            throw new \UnexpectedValueException($result['error'], $result['error_code']);
+            return false;
         }
     }
 

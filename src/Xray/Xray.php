@@ -94,7 +94,7 @@ class Xray
         $full_config = $this->get_full_config();
         if ($full_config['ok']) {
             $response = $full_config['response'];
-            $xray_settings = new settings($response);
+            $xray_settings = new Settings($response);
             $response = $xray_settings->get($config);
             $et = microtime(true);
             $tt = round($et - $st, 3);
@@ -118,7 +118,7 @@ class Xray
         $full_config = $this->get_full_config();
         if ($full_config['ok']) {
             $response = $full_config['response'];
-            $xray_settings = new settings($response);
+            $xray_settings = new Settings($response);
             $xray_settings->update($update);
             try {
                 $result = $this->guzzle->post("panel/xray/update", [
@@ -150,6 +150,28 @@ class Xray
         $st = microtime(true);
         try {
             $result = $this->guzzle->post("panel/setting/restartXrayService");
+            $body = $result->getBody();
+            $response = $this->response_output(json::_in($body->getContents(), true));
+            $et = microtime(true);
+            $tt = round($et - $st, 3);
+            $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
+        } catch (GuzzleException $err) {
+            $error_code = $err->getCode();
+            $error = $err->getMessage();
+            $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
+        }
+        return $this->output($return);
+    }
+
+    public function set_config(array $full_config)
+    {
+        $st = microtime(true);
+        try {
+            $result = $this->guzzle->post("panel/xray/update", [
+                'form_params' => [
+                    'xraySetting' => json::_out($full_config)
+                ]
+            ]);
             $body = $result->getBody();
             $response = $this->response_output(json::_in($body->getContents(), true));
             $et = microtime(true);

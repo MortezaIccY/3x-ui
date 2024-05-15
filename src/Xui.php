@@ -6,17 +6,9 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\FileCookieJar;
 use GuzzleHttp\Exception\GuzzleException;
 use JSON\json;
-use XUI\Panel\panel;
-use XUI\Server\server;
-use XUI\Xray\Inbound\Protocols\Http\Http;
-use XUI\Xray\Inbound\Protocols\Shadowsocks\Shadowsocks;
-use XUI\Xray\Inbound\Protocols\Socks\Socks;
-use XUI\Xray\Inbound\Protocols\Trojan\Trojan;
-use XUI\Xray\Inbound\Protocols\Vless\Vless;
-use XUI\Xray\Inbound\Protocols\Vmess\Vmess;
-use XUI\Xray\xray;
-
-require_once 'vendor/autoload.php';
+use XUI\Panel\Panel;
+use XUI\Server\Server;
+use XUI\Xray\Xray;
 
 class Xui
 {
@@ -28,9 +20,9 @@ class Xui
     private Client $guzzle;
     public int $output;
     public int $response_output;
-    public server $server;
-    public panel $panel;
-    public xray $xray;
+    public Server $server;
+    public Panel $panel;
+    public Xray $xray;
     public const OUTPUT_JSON = 111;
     public const OUTPUT_OBJECT = 112;
     public const OUTPUT_ARRAY = 113;
@@ -46,7 +38,7 @@ class Xui
         $xui_uri_path = '/',
         $has_ssl = false,
         $cookie_dir = null,
-        $timeout = 5,
+        $timeout = 10,
         $proxy = null,
         $output = self::OUTPUT_OBJECT,
         $response_output = self::OUTPUT_OBJECT
@@ -77,9 +69,9 @@ class Xui
         if ($this->is_login()) {
             $et = microtime(true);
             $tt = round($et - $st, 3);
-            $this->server = new server($this->guzzle, $this->output, $this->response_output);
-            $this->panel = new panel($this->guzzle, $this->output, $this->response_output);
-            $this->xray = new xray($this->guzzle, $this->output, $this->response_output);
+            $this->server = new Server($this->guzzle, $this->output, $this->response_output);
+            $this->panel = new Panel($this->guzzle, $this->output, $this->response_output);
+            $this->xray = new Xray($this->guzzle, $this->output, $this->response_output);
             $return = ['ok' => true, 'response' => null, 'size' => null, 'time_taken' => $tt];
         } else {
             try {
@@ -92,9 +84,9 @@ class Xui
                 $body = $result->getBody();
                 $contents = json::_in($body->getContents(), true);
                 if ($contents['success']):
-                    $this->server = new server($this->guzzle, $this->output, $this->response_output);
-                    $this->panel = new panel($this->guzzle, $this->output, $this->response_output);
-                    $this->xray = new xray($this->guzzle, $this->output, $this->response_output);
+                    $this->server = new Server($this->guzzle, $this->output, $this->response_output);
+                    $this->panel = new Panel($this->guzzle, $this->output, $this->response_output);
+                    $this->xray = new Xray($this->guzzle, $this->output, $this->response_output);
                 endif;
                 $response = $this->response_output($contents);
                 $et = microtime(true);
@@ -118,58 +110,6 @@ class Xui
             return false;
         }
     }
-
-//    public static function v2rayng(Vmess|Vless|Shadowsocks|Trojan|Socks|Http $inbound_config, $address, $name)
-//    {
-//        $inbound_stream = $inbound_config->stream_settings;
-//        switch ($inbound_config->protocol):
-//            case 'vmess':
-//                $config = [
-//                    'v' => 2,
-//                    'ps' => $name,
-//                    'add' => $address,
-//                    'port' => $inbound_config->port,
-//                    'id' => $inbound_config->settings->clients[0]['id'],
-//                ];
-//                switch ($inbound_stream->network):
-//                    case 'tcp':
-//                        $config['net']=
-//                        $config['path']=()$inbound_stream->tcp_settings['']
-//                    break;
-//                    case 'ws':
-//
-//                    break;
-//                endswitch;
-//            break;
-//            case 'vless':
-//                $config['v'] = 2;
-//                $config['ps'] = $name;
-//                $config['add'] = $address;
-//                $config['port'] = $inbound_config->port;
-//                $config['id'] = $inbound_config->settings->clients[0]['id'];
-//                switch ($inbound_stream->network):
-//                    case 'tcp':
-//
-//                    break;
-//                    case 'ws':
-//
-//                    break;
-//                endswitch;
-//            break;
-//            case 'shadowsocks':
-//
-//            break;
-//            case 'trojan':
-//
-//            break;
-//            case 'socks':
-//
-//            break;
-//            case 'http':
-//
-//            break;
-//        endswitch;
-//    }
 
     public static function random(int $length = 32): string
     {

@@ -124,7 +124,7 @@ class StreamSettings
             'mtu' => $mtu,
             'tti' => $tti,
             'uplinkCapacity' => $uplink_capacity,
-            'downLinkCapacity' => $down_link_capacity,
+            'downlinkCapacity' => $down_link_capacity,
             'congestion' => $congestion,
             'readBufferSize' => $read_buffer_size,
             'writeBufferSize' => $write_buffer_size,

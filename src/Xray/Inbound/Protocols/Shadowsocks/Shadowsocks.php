@@ -29,12 +29,13 @@ class Shadowsocks
         if (!is_null($listen)) $this->listen = $listen;
         if (!is_null($port)) $this->port = $port;
         if (!is_null($settings)):
-            $settings = json::_in($settings,true);
+            $settings = json::_in($settings, true);
             $this->settings = new Settings($settings['clients'], $settings['password'], $settings['method'], $settings['network']);
         endif;
         if (!is_null($stream_settings)):
-            $stream_settings = json::_in($stream_settings,true);
-            $this->stream_settings = new StreamSettings($stream_settings['network'], $stream_settings['security'], $stream_settings['externalProxy']);
+            $stream_settings = json::_in($stream_settings, true);
+            $extrernalProxy = (isset($stream_settings['externalProxy'])) ? $stream_settings['externalProxy'] : [];
+            $this->stream_settings = new StreamSettings($stream_settings['network'], $stream_settings['security'], $extrernalProxy);
             if (isset($stream_settings['tlsSettings'])) $this->stream_settings->tls_settings = $stream_settings['tlsSettings'];
             if (isset($stream_settings['tcpSettings'])) $this->stream_settings->tcp_settings = $stream_settings['tcpSettings'];
             if (isset($stream_settings['kcpSettings'])) $this->stream_settings->kcp_settings = $stream_settings['kcpSettings'];
