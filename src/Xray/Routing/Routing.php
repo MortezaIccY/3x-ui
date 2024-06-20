@@ -5,6 +5,7 @@ namespace XUI\Xray\Routing;
 use GuzzleHttp\Client;
 use JSON\json;
 use XUI\Xray\Xray;
+use XUI\Xui;
 
 class Routing
 {
@@ -17,11 +18,8 @@ class Routing
     public array $rules;
     public array $reverses;
     public array $balancers;
-    public const OUTPUT_JSON = 111;
-    public const OUTPUT_OBJECT = 112;
-    public const OUTPUT_ARRAY = 113;
 
-    public function __construct(Client $guzzle, int $output = self::OUTPUT_OBJECT, int $response_output = self::OUTPUT_OBJECT)
+    public function __construct(Client $guzzle, int $output = Xui::OUTPUT_OBJECT, int $response_output = Xui::OUTPUT_OBJECT)
     {
         $this->guzzle = $guzzle;
         $this->output = $output;
@@ -35,7 +33,7 @@ class Routing
      */
     public function load(): bool
     {
-        $this->xray = new Xray($this->guzzle, Xray::OUTPUT_ARRAY, Xray::OUTPUT_ARRAY);
+        $this->xray = new Xray($this->guzzle, Xui::OUTPUT_ARRAY, Xui::OUTPUT_ARRAY);
         $result = $this->xray->get_config('routing');
         if ($result['ok'] && !empty($result['response'])) {
             $routing = $result['response'];
@@ -227,10 +225,10 @@ class Routing
     private function output(array $data)
     {
         switch ($this->output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;
@@ -244,10 +242,10 @@ class Routing
     private function response_output(array $data)
     {
         switch ($this->response_output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;

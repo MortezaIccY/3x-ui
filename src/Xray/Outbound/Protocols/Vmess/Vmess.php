@@ -3,7 +3,6 @@
 namespace XUI\Xray\Outbound\Protocols\Vmess;
 
 use JSON\json;
-use XUI\Xray\Outbound\Protocols\Vmess\Settings;
 use XUI\Xray\Outbound\Protocols\StreamSettings;
 
 class Vmess

@@ -3,7 +3,6 @@
 namespace XUI\Xray\Outbound\Protocols\Dns;
 
 use JSON\json;
-use XUI\Xray\Outbound\Protocols\Dns\Settings;
 
 class Dns
 {

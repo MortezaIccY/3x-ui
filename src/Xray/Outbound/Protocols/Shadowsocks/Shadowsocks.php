@@ -3,8 +3,6 @@
 namespace XUI\Xray\Outbound\Protocols\Shadowsocks;
 
 use JSON\json;
-use XUI\Xray\Outbound\Protocols\Shadowsocks\Settings;
-use XUI\Xray\Outbound\Protocols\Sniffing;
 use XUI\Xray\Outbound\Protocols\StreamSettings;
 
 class Shadowsocks

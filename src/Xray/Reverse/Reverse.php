@@ -5,6 +5,7 @@ namespace XUI\Xray\Reverse;
 use GuzzleHttp\Client;
 use JSON\json;
 use XUI\Xray\Xray;
+use XUI\Xui;
 
 class Reverse
 {
@@ -14,11 +15,8 @@ class Reverse
     public int $response_output;
     public array $bridges = [];
     public array $portals = [];
-    public const OUTPUT_JSON = 111;
-    public const OUTPUT_OBJECT = 112;
-    public const OUTPUT_ARRAY = 113;
 
-    public function __construct(Client $guzzle, int $output = self::OUTPUT_OBJECT, int $response_output = self::OUTPUT_OBJECT)
+    public function __construct(Client $guzzle, int $output = Xui::OUTPUT_OBJECT, int $response_output = Xui::OUTPUT_OBJECT)
     {
         $this->guzzle = $guzzle;
         $this->output = $output;
@@ -27,7 +25,7 @@ class Reverse
 
     public function load(): bool
     {
-        $this->xray = new Xray($this->guzzle, Xray::OUTPUT_ARRAY, Xray::OUTPUT_ARRAY);
+        $this->xray = new Xray($this->guzzle, Xui::OUTPUT_ARRAY, Xui::OUTPUT_ARRAY);
         $result = $this->xray->get_full_config()['response'];
         if (isset($result['reverse'])) {
             $reverse = $result['reverse'];
@@ -272,10 +270,10 @@ class Reverse
     private function output(array $data)
     {
         switch ($this->output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;
@@ -289,10 +287,10 @@ class Reverse
     private function response_output(array $data)
     {
         switch ($this->response_output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;

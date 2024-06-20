@@ -9,6 +9,7 @@ use XUI\Xray\Reverse\Reverse;
 use XUI\Xray\Routing\Routing;
 use XUI\Xray\Inbound\Inbound;
 use XUI\Xray\Outbound\Outbound;
+use XUI\Xui;
 
 class Xray
 {
@@ -19,16 +20,8 @@ class Xray
     public Outbound $outbound;
     public Routing $routing;
     public Reverse $reverse;
-    public const OUTPUT_JSON = 111;
-    public const OUTPUT_OBJECT = 112;
-    public const OUTPUT_ARRAY = 113;
-    public const UNIT_BYTE = 1;
-    public const UNIT_KILOBYTE = 1024;
-    public const UNIT_MEGABYTE = 1024 * self::UNIT_KILOBYTE;
-    public const UNIT_GIGABYTE = 1024 * self::UNIT_MEGABYTE;
-    public const UNIT_TERABYTE = 1024 * self::UNIT_GIGABYTE;
 
-    public function __construct(Client $guzzle, int $output = self::OUTPUT_OBJECT, int $response_output = self::OUTPUT_OBJECT)
+    public function __construct(Client $guzzle, int $output = Xui::OUTPUT_OBJECT, int $response_output = Xui::OUTPUT_OBJECT)
     {
         $this->guzzle = $guzzle;
         $this->output = $output;
@@ -88,9 +81,9 @@ class Xray
     {
         $st = microtime(true);
         $last_output = $this->output;
-        $this->output = self::OUTPUT_ARRAY;
+        $this->output = Xui::OUTPUT_ARRAY;
         $last_response_output = $this->response_output;
-        $this->response_output = self::OUTPUT_ARRAY;
+        $this->response_output = Xui::OUTPUT_ARRAY;
         $full_config = $this->get_full_config();
         if ($full_config['ok']) {
             $response = $full_config['response'];
@@ -112,9 +105,9 @@ class Xray
     {
         $st = microtime(true);
         $last_output = $this->output;
-        $this->output = self::OUTPUT_ARRAY;
+        $this->output = Xui::OUTPUT_ARRAY;
         $last_response_output = $this->response_output;
-        $this->response_output = self::OUTPUT_ARRAY;
+        $this->response_output = Xui::OUTPUT_ARRAY;
         $full_config = $this->get_full_config();
         if ($full_config['ok']) {
             $response = $full_config['response'];
@@ -188,10 +181,10 @@ class Xray
     private function output(array $data): mixed
     {
         switch ($this->output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;
@@ -205,10 +198,10 @@ class Xray
     private function response_output(array $data): mixed
     {
         switch ($this->response_output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;

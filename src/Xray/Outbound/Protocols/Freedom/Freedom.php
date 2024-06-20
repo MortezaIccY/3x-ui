@@ -3,7 +3,6 @@
 namespace XUI\Xray\Outbound\Protocols\Freedom;
 
 use JSON\json;
-use XUI\Xray\Outbound\Protocols\Freedom\Settings;
 
 class Freedom
 {

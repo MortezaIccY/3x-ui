@@ -3,7 +3,6 @@
 namespace XUI\Xray\Outbound\Protocols\Vless;
 
 use JSON\json;
-use XUI\Xray\Outbound\Protocols\Vless\Settings;
 use XUI\Xray\Outbound\Protocols\StreamSettings;
 
 class Vless

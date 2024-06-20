@@ -2,8 +2,6 @@
 
 namespace XUI\Xray\Inbound\Protocols;
 
-use JSON\json;
-
 class Sniffing
 {
     private bool $enabled;
@@ -24,49 +22,29 @@ class Sniffing
         $this->route_only = $route_only;
     }
 
-    public function enabled(bool $status = null): bool|null
+    public function enabled(bool $status = null): bool
     {
-        if (is_null($status)) {
-            return $this->enabled;
-        } else {
-            $this->enabled = $status;
-        }
+        return $status ? $this->enabled = $status : $this->enabled;
     }
 
-    public function dest_override(array $destinations = null): array|null
+    public function dest_override(array $destinations = null): array
     {
-        if (is_null($destinations)) {
-            return $this->dest_override;
-        } else {
-            $this->dest_override = $destinations;
-        }
+        return $destinations ? $this->dest_override = $destinations : $this->dest_override;
     }
 
-    public function metadata_only(bool $status = null): bool|null
+    public function metadata_only(bool $status = null): bool
     {
-        if (is_null($status)) {
-            return $this->metadata_only;
-        } else {
-            $this->metadata_only = $status;
-        }
+        return $status ? $this->metadata_only = $status : $this->metadata_only;
     }
 
-    public function domains_excluded(array $domains = null): array|null
+    public function domains_excluded(array $domains = null): array
     {
-        if (is_null($domains)) {
-            return $this->domains_excluded;
-        } else {
-            $this->domains_excluded = $domains;
-        }
+        return $domains ? $this->domains_excluded = $domains : $this->domains_excluded;
     }
 
-    public function route_only(bool $status = null): bool|null
+    public function route_only(bool $status = null): bool
     {
-        if (is_null($status)) {
-            return $this->route_only;
-        } else {
-            $this->route_only = $status;
-        }
+        return $status ? $this->route_only = $status : $this->route_only;
     }
 
     /**

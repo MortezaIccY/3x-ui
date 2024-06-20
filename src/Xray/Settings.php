@@ -2,8 +2,6 @@
 
 namespace XUI\Xray;
 
-use JSON\json;
-
 class Settings
 {
     public array $settings;

@@ -47,10 +47,12 @@ class Shadowsocks
             if (isset($stream_settings['sockopt'])) $this->stream_settings->sockopt = $stream_settings['sockopt'];
             if (isset($stream_settings['realitySettings'])) $this->stream_settings->reality_settings = $stream_settings['realitySettings'];
         endif;
-        if (!is_null($sniffing)):
+        if (is_null($sniffing)) {
+            $this->sniffing = new Sniffing();
+        } else {
             $sniffing = json::_in($sniffing);
             $this->sniffing = new Sniffing($sniffing->enabled, $sniffing->destOverride);
-        endif;
+        }
     }
 
     public function generate(

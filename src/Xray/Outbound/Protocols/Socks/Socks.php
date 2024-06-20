@@ -3,7 +3,6 @@
 namespace XUI\Xray\Outbound\Protocols\Socks;
 
 use JSON\json;
-use XUI\Xray\Outbound\Protocols\Socks\Settings;
 
 class Socks
 {

@@ -3,7 +3,6 @@
 namespace XUI\Xray\Outbound\Protocols\Trojan;
 
 use JSON\json;
-use XUI\Xray\Outbound\Protocols\Trojan\Settings;
 use XUI\Xray\Outbound\Protocols\StreamSettings;
 
 class Trojan

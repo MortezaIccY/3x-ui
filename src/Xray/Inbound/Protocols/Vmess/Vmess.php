@@ -46,10 +46,12 @@ class Vmess
             if (isset($stream_settings['grpcSettings'])) $this->stream_settings->grpc_settings = $stream_settings['grpcSettings'];
             if (isset($stream_settings['sockopt'])) $this->stream_settings->sockopt = $stream_settings['sockopt'];
         endif;
-        if (!is_null($sniffing)):
+        if (is_null($sniffing)) {
+            $this->sniffing = new Sniffing();
+        } else {
             $sniffing = json::_in($sniffing);
             $this->sniffing = new Sniffing($sniffing->enabled, $sniffing->destOverride);
-        endif;
+        }
     }
 
     public function generate(

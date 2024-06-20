@@ -148,7 +148,7 @@ class Xui
         );
     }
 
-    private function output(array $data)
+    public function output(array $data)
     {
         switch ($this->output):
             case self::OUTPUT_JSON:
@@ -165,7 +165,7 @@ class Xui
         return $return;
     }
 
-    private function response_output(array $data)
+    public function response_output(array $data)
     {
         switch ($this->response_output):
             case self::OUTPUT_JSON:

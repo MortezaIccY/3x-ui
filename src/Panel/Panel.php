@@ -5,22 +5,15 @@ namespace XUI\Panel;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use JSON\json;
+use XUI\Xui;
 
 class Panel
 {
     private Client $guzzle;
     public int $output;
     public int $response_output;
-    public const OUTPUT_JSON = 111;
-    public const OUTPUT_OBJECT = 112;
-    public const OUTPUT_ARRAY = 113;
-    public const UNIT_BYTE = 1;
-    public const UNIT_KILOBYTE = 1024;
-    public const UNIT_MEGABYTE = 1024 * self::UNIT_KILOBYTE;
-    public const UNIT_GIGABYTE = 1024 * self::UNIT_MEGABYTE;
-    public const UNIT_TERABYTE = 1024 * self::UNIT_GIGABYTE;
 
-    public function __construct(Client $guzzle, int $output = self::OUTPUT_OBJECT, int $response_output = self::OUTPUT_OBJECT)
+    public function __construct(Client $guzzle, int $output = Xui::OUTPUT_OBJECT, int $response_output = Xui::OUTPUT_OBJECT)
     {
         $this->guzzle = $guzzle;
         $this->output = $output;
@@ -30,7 +23,6 @@ class Panel
     public function all_settings()
     {
         $st = microtime(true);
-        $result = $this->guzzle->post('panel/setting/all');
         try {
             $result = $this->guzzle->post("panel/setting/all");
             $body = $result->getBody();
@@ -73,10 +65,10 @@ class Panel
         }
         return $this->output($return);
     }
+
     public function restart()
     {
         $st = microtime(true);
-        $result = $this->guzzle->post('panel/setting/restartPanel');
         try {
             $result = $this->guzzle->post("panel/setting/restartPanel");
             $body = $result->getBody();
@@ -91,6 +83,7 @@ class Panel
         }
         return $this->output($return);
     }
+
     public function default_xray_config()
     {
         $st = microtime(true);
@@ -108,13 +101,14 @@ class Panel
         }
         return $this->output($return);
     }
+
     private function output(array $data)
     {
         switch ($this->output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;
@@ -128,10 +122,10 @@ class Panel
     private function response_output(array $data)
     {
         switch ($this->response_output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;

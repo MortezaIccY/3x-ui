@@ -36,7 +36,7 @@ class Vless
             $this->settings = new Settings($settings['clients'], $settings['fallbacks'], $settings['decryption']);
         endif;
         if (!is_null($stream_settings)):
-            $stream_settings = json::_in($stream_settings,true);
+            $stream_settings = json::_in($stream_settings, true);
             $extrernalProxy = (isset($stream_settings['externalProxy'])) ? $stream_settings['externalProxy'] : [];
             $this->stream_settings = new StreamSettings($stream_settings['network'], $stream_settings['security'], $extrernalProxy);
             if (isset($stream_settings['tlsSettings'])) $this->stream_settings->tls_settings = $stream_settings['tlsSettings'];
@@ -50,10 +50,12 @@ class Vless
             if (isset($stream_settings['sockopt'])) $this->stream_settings->sockopt = $stream_settings['sockopt'];
             if (isset($stream_settings['realitySettings'])) $this->stream_settings->reality_settings = $stream_settings['realitySettings'];
         endif;
-        if (!is_null($sniffing)):
+        if (is_null($sniffing)) {
+            $this->sniffing = new Sniffing();
+        } else {
             $sniffing = json::_in($sniffing);
             $this->sniffing = new Sniffing($sniffing->enabled, $sniffing->destOverride);
-        endif;
+        }
     }
 
     public function generate(

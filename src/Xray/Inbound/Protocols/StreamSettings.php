@@ -44,9 +44,10 @@ class StreamSettings
      * @link https://xtls.github.io/en/config/transport.html#tlsobject
      */
     public function tls_settings(
-        string $server_name, bool $reject_unknown_sni, bool $allow_insecure, array $alpn, string $min_version, string $max_version,
-        string $cipher_suites, array $certificates, bool $disable_system_root, bool $enable_session_resumption, string $fingerprint,
-        array  $pinned_peer_certificate_chain_sha256
+        string $server_name, bool $reject_unknown_sni = false, bool $allow_insecure = false, array $alpn = ['h2', 'http/1.1'],
+        string $min_version = '1.2', string $max_version = '1.3', string $cipher_suites = '', array $certificates = [],
+        bool   $disable_system_root = false, bool $enable_session_resumption = false, string $fingerprint = '',
+        array  $pinned_peer_certificate_chain_sha256 = ['']
     ): void
     {
         $this->security = 'tls';

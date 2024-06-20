@@ -3,7 +3,6 @@
 namespace XUI\Xray\Outbound\Protocols\Blackhole;
 
 use JSON\json;
-use XUI\Xray\Outbound\Protocols\Blackhole\Settings;
 
 class Blackhole
 {

@@ -12,22 +12,22 @@ use XUI\Xray\Inbound\Protocols\Socks\Socks;
 use XUI\Xray\Inbound\Protocols\Trojan\Trojan;
 use XUI\Xray\Inbound\Protocols\Vless\Vless;
 use XUI\Xray\Inbound\Protocols\Vmess\Vmess;
+use XUI\Xray\Outbound\Protocols\StreamSettings as ob_StreamSettings;
+use XUI\Xray\Outbound\Protocols\Trojan\Trojan as ob_Trojan;
+use XUI\Xray\Outbound\Protocols\Shadowsocks\Shadowsocks as ob_Shadowsocks;
+use XUI\Xray\Outbound\Protocols\Vmess\Vmess as ob_Vmess;
+use XUI\Xray\Outbound\Protocols\Vless\Vless as ob_Vless;
+use XUI\Xray\Outbound\Protocols\Socks\Socks as ob_Socks;
+use XUI\Xray\Outbound\Protocols\Http\Http as ob_Http;
+use XUI\Xui;
 
 class Inbound
 {
     private Client $guzzle;
     public int $output;
     public int $response_output;
-    public const OUTPUT_JSON = 111;
-    public const OUTPUT_OBJECT = 112;
-    public const OUTPUT_ARRAY = 113;
-    public const UNIT_BYTE = 1;
-    public const UNIT_KILOBYTE = 1024;
-    public const UNIT_MEGABYTE = 1024 * self::UNIT_KILOBYTE;
-    public const UNIT_GIGABYTE = 1024 * self::UNIT_MEGABYTE;
-    public const UNIT_TERABYTE = 1024 * self::UNIT_GIGABYTE;
 
-    public function __construct(Client $guzzle, int $output = self::OUTPUT_OBJECT, int $response_output = self::OUTPUT_OBJECT)
+    public function __construct(Client $guzzle, int $output = Xui::OUTPUT_OBJECT, int $response_output = Xui::OUTPUT_OBJECT)
     {
         $this->guzzle = $guzzle;
         $this->output = $output;
@@ -123,13 +123,13 @@ class Inbound
      * @param int $inbound_id
      * @return array|false|mixed|string
      */
-    public function get(int $inbound_id): mixed
+    public function get(int $inbound_id, bool $return_config = false): mixed
     {
         $st = microtime(true);
         $last_output = $this->output;
         $last_response_output = $this->response_output;
-        $this->output = self::OUTPUT_OBJECT;
-        $this->response_output = self::OUTPUT_OBJECT;
+        $this->output = Xui::OUTPUT_OBJECT;
+        $this->response_output = Xui::OUTPUT_OBJECT;
         $result = $this->list();
         if ($result->ok) {
             $response = $result->response;
@@ -177,8 +177,8 @@ class Inbound
     {
         $last_output = $this->output;
         $last_response_output = $this->response_output;
-        $this->output = self::OUTPUT_OBJECT;
-        $this->response_output = self::OUTPUT_OBJECT;
+        $this->output = Xui::OUTPUT_OBJECT;
+        $this->response_output = Xui::OUTPUT_OBJECT;
         $result = $this->list();
         if ($result->ok) {
             $response = $result->response;
@@ -219,8 +219,8 @@ class Inbound
         $st = microtime(true);
         $last_output = $this->output;
         $last_response_output = $this->response_output;
-        $this->output = self::OUTPUT_OBJECT;
-        $this->response_output = self::OUTPUT_OBJECT;
+        $this->output = Xui::OUTPUT_OBJECT;
+        $this->response_output = Xui::OUTPUT_OBJECT;
         $result = $this->list();
         if ($result->ok) {
             $response = $result->response;
@@ -348,8 +348,8 @@ class Inbound
         $st = microtime(true);
         $last_output = $this->output;
         $last_response_output = $this->response_output;
-        $this->output = self::OUTPUT_OBJECT;
-        $this->response_output = self::OUTPUT_OBJECT;
+        $this->output = Xui::OUTPUT_OBJECT;
+        $this->response_output = Xui::OUTPUT_OBJECT;
         $result = $this->get($inbound_id);
         if ($result->ok) {
             $inbound = $result->response;
@@ -400,7 +400,6 @@ class Inbound
         }
         return $this->output($return);
     }
-
     public function get_client_ips($client_email)
     {
         $st = microtime(true);
@@ -438,34 +437,93 @@ class Inbound
     }
 
     /**
+     * Read inbound config exported or got from server.
+     * @param array|string|object $inbound
+     * @return Http|Socks|Vless|false|Trojan|Shadowsocks|Vmess|DokodemoDoor
+     */
+    public static function read(array|string|object $inbound): Http|Socks|Vless|false|Trojan|Shadowsocks|Vmess|DokodemoDoor
+    {
+        $inbound = match (true) {
+            (is_array($inbound)) => json::_in(json::_out($inbound)),
+            (is_string($inbound) && json::_is($inbound)) => json::_in($inbound),
+            default => $inbound
+        };
+        if (is_object($inbound)) {
+            switch ($inbound->protocol):
+                case 'vmess':
+                    $settings = $inbound->settings;
+                    $stream = $inbound->streamSettings;
+                    $sniffing = $inbound->sniffing;
+                    $config = new Vmess($inbound->listen, $inbound->port, $settings, $stream, $sniffing);
+                break;
+                case 'vless':
+                    $settings = $inbound->settings;
+                    $stream = $inbound->streamSettings;
+                    $sniffing = $inbound->sniffing;
+                    $config = new Vless($inbound->listen, $inbound->port, $settings, $stream, $sniffing);
+                break;
+                case 'trojan':
+                    $settings = $inbound->settings;
+                    $stream = $inbound->streamSettings;
+                    $sniffing = $inbound->sniffing;
+                    $config = new Trojan($inbound->listen, $inbound->port, $settings, $stream, $sniffing);
+                break;
+                case 'shadowsocks':
+                    $settings = $inbound->settings;
+                    $stream = $inbound->streamSettings;
+                    $sniffing = $inbound->sniffing;
+                    $config = new Shadowsocks($inbound->listen, $inbound->port, $settings, $stream, $sniffing);
+                break;
+                case 'dokodemo-door':
+                    $settings = $inbound->settings;
+                    $config = new DokodemoDoor($inbound->listen, $inbound->port, $settings);
+                break;
+                case 'socks':
+                    $settings = $inbound->settings;
+                    $config = new Socks($inbound->listen, $inbound->port, $settings);
+                break;
+                case 'http':
+                    $settings = $inbound->settings;
+                    $config = new Http($inbound->listen, $inbound->port, $settings);
+                break;
+            endswitch;
+            return $config ?? false;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Convert inbound config to outbound config
      * @param string $address
      * @param int $port
      * @param Vmess|Vless|Trojan|Shadowsocks|Socks|Http $inbound_config
-     * @return \XUI\Xray\Outbound\Protocols\Shadowsocks\Shadowsocks|\XUI\Xray\Outbound\Protocols\Socks\Socks|\XUI\Xray\Outbound\Protocols\Trojan\Trojan|\XUI\Xray\Outbound\Protocols\Vless\Vless|\XUI\Xray\Outbound\Protocols\Vmess\Vmess
+     * @return ob_Trojan|ob_Shadowsocks|ob_Vmess|ob_Vless|ob_Socks|ob_Http|false
      */
     public static function to_outbound(
-        string $address, int $port, Vmess|Vless|Trojan|Shadowsocks|Socks|Http $inbound_config
-    ): \XUI\Xray\Outbound\Protocols\Trojan\Trojan|\XUI\Xray\Outbound\Protocols\Shadowsocks\Shadowsocks|\XUI\Xray\Outbound\Protocols\Vmess\Vmess|\XUI\Xray\Outbound\Protocols\Vless\Vless|\XUI\Xray\Outbound\Protocols\Socks\Socks
+        string $address, Vmess|Vless|Trojan|Shadowsocks|Socks|Http $inbound_config, int|null $port = null
+    ): ob_Trojan|ob_Shadowsocks|ob_Vmess|ob_Vless|ob_Socks|ob_Http|false
     {
+        $port = $port ?? $inbound_config->port;
         switch ($inbound_config->protocol):
             case 'vmess':
                 $settings = $inbound_config->settings;
                 $stream = $inbound_config->stream_settings;
-                $config = new \XUI\Xray\Outbound\Protocols\Vmess\Vmess();
+                $config = new ob_Vmess();
                 $config_settings = new \XUI\Xray\Outbound\Protocols\Vmess\Settings($address, $port);
                 $config_settings->add_user($settings->clients[0]['id']);
             break;
             case 'vless':
                 $settings = $inbound_config->settings;
                 $stream = $inbound_config->stream_settings;
-                $config = new \XUI\Xray\Outbound\Protocols\Vless\Vless();
+                $config = new ob_Vless();
                 $config_settings = new \XUI\Xray\Outbound\Protocols\Vless\Settings($address, $port);
                 $config_settings->add_user($settings->clients[0]['id']);
             break;
             case 'trojan':
                 $settings = $inbound_config->settings;
                 $stream = $inbound_config->stream_settings;
-                $config = new \XUI\Xray\Outbound\Protocols\Trojan\Trojan();
+                $config = new ob_Trojan();
                 $config_settings = new \XUI\Xray\Outbound\Protocols\Trojan\Settings(
                     $address, $port, $settings->clients[0]['password'], $settings->clients[0]['email']
                 );
@@ -473,30 +531,47 @@ class Inbound
             case 'shadowsocks':
                 $settings = $inbound_config->settings;
                 $stream = $inbound_config->stream_settings;
-                $config = new \XUI\Xray\Outbound\Protocols\Shadowsocks\Shadowsocks();
+                $config = new ob_Shadowsocks();
                 $config_settings = new \XUI\Xray\Outbound\Protocols\Shadowsocks\Settings(
                     $address, $port, $settings->password, $settings->method, $settings->email
                 );
             break;
             case 'socks':
                 $settings = $inbound_config->settings;
-                $config = new \XUI\Xray\Outbound\Protocols\Socks\Socks();
+                $config = new ob_Socks();
                 $config_settings = new \XUI\Xray\Outbound\Protocols\Socks\Settings($address, $port);
                 $config_settings->add_user($settings->accounts[0]['username'], $settings->accounts[0]['password']);
             break;
             case 'http':
                 $settings = $inbound_config->settings;
+                $config = new ob_Http();
                 $config_settings = new \XUI\Xray\Outbound\Protocols\Http\Settings($address, $port);
                 $config_settings->add_user($settings->accounts[0]['username'], $settings->accounts[0]['password']);
             break;
         endswitch;
+        if (isset($config_settings))
+            $config->settings = $config_settings;
         if (isset($stream)):
-            $config_stream = $config->stream_settings;
-            $config_stream->network = $stream->network;
-            $config_stream->security = $stream->security;
+            $config_stream = new ob_StreamSettings($stream->network, $stream->security);
             switch ($stream->network):
                 case 'tcp':
-                    $config_stream->tcp_settings($stream->tcp_settings['header']['type'], $stream->tcp_settings['header']['request']);
+                    $header_type = $stream->tcp_settings['header']['type'];
+                    switch ($header_type):
+                        case 'http':
+                            $request_headers = $stream->tcp_settings['header']['request']['headers'];
+                            $request_headers = (empty($request_headers)) ? ['Host' => []] : $request_headers;
+                            $header_request = [
+                                'version' => $stream->tcp_settings['header']['response']['version'],
+                                'method' => $stream->tcp_settings['header']['request']['method'],
+                                'path' => $stream->tcp_settings['header']['request']['path'],
+                                'headers' => $request_headers
+                            ];
+                        break;
+                        case 'none':
+                            $header_request = [];
+                        break;
+                    endswitch;
+                    $config_stream->tcp_settings($header_type, $header_request);
                 break;
                 case 'ws':
                     $config_stream->ws_settings($stream->ws_settings['acceptProxyProtocol'], $stream->ws_settings['path']);
@@ -563,17 +638,18 @@ class Inbound
                     );
                 break;
             endswitch;
+            $config->stream_settings = $config_stream;
         endif;
-        return $config;
+        return $config ?? false;
     }
 
     private function output(array $data)
     {
         switch ($this->output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;
@@ -587,10 +663,10 @@ class Inbound
     private function response_output(array $data)
     {
         switch ($this->response_output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;

@@ -39,13 +39,13 @@ class Settings
     }
 
     public function update_client(
-        string $client_password, bool $enable = null, string $email = null, string $password = null, int $total_traffic = null,
+        string $client_email, bool $enable = null, string $email = null, string $password = null, int $total_traffic = null,
         int    $expiry_time = null, int $limit_ip = null, int $tgid = null, string $subid = null, int $reset = null
     ): bool
     {
         $updated = false;
         foreach ($this->clients as $key => $client):
-            if ($client['password'] == $client_password):
+            if ($client['email'] == $client_email):
                 if (!is_null($email)) $client['email'] = $email;
                 if (!is_null($enable)) $client['enable'] = $enable;
                 if (!is_null($total_traffic)) $client['totalGB'] = $total_traffic;
@@ -63,11 +63,11 @@ class Settings
         return $updated;
     }
 
-    public function get_client(string $client_password): array|false
+    public function get_client(string $client_email): array|false
     {
         $return = false;
         foreach ($this->clients as $key => $client):
-            if ($client['password'] == $client_password):
+            if ($client['email'] == $client_email):
                 $return = $this->clients[$key];
                 break;
             endif;
@@ -75,11 +75,11 @@ class Settings
         return $return;
     }
 
-    public function has_client(string $client_password): bool
+    public function has_client(string $client_email): bool
     {
         $return = false;
         foreach ($this->clients as $client):
-            if ($client['password'] == $client_password):
+            if ($client['email'] == $client_email):
                 $return = true;
                 break;
             endif;
@@ -87,11 +87,11 @@ class Settings
         return $return;
     }
 
-    public function remove_client(string $client_password): bool
+    public function remove_client(string $client_email): bool
     {
         $removed = false;
         foreach ($this->clients as $key => $client):
-            if ($client['password'] == $client_password):
+            if ($client['email'] == $client_email):
                 unset($this->clients[$key]);
                 $removed = true;
                 break;

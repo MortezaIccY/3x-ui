@@ -3,7 +3,6 @@
 namespace XUI\Xray\Outbound\Protocols\Http;
 
 use JSON\json;
-use XUI\Xray\Outbound\Protocols\Http\Settings;
 
 class Http
 {

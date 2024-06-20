@@ -5,22 +5,15 @@ namespace XUI\Server;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use JSON\json;
+use XUI\Xui;
 
 class Server
 {
     private Client $guzzle;
     public int $output;
     public int $response_output;
-    public const OUTPUT_JSON = 111;
-    public const OUTPUT_OBJECT = 112;
-    public const OUTPUT_ARRAY = 113;
-    public const UNIT_BYTE = 1;
-    public const UNIT_KILOBYTE = 1024;
-    public const UNIT_MEGABYTE = 1024 * self::UNIT_KILOBYTE;
-    public const UNIT_GIGABYTE = 1024 * self::UNIT_MEGABYTE;
-    public const UNIT_TERABYTE = 1024 * self::UNIT_GIGABYTE;
 
-    public function __construct(Client $guzzle, int $output = self::OUTPUT_OBJECT, int $response_output = self::OUTPUT_OBJECT)
+    public function __construct(Client $guzzle, int $output = Xui::OUTPUT_OBJECT, int $response_output = Xui::OUTPUT_OBJECT)
     {
         $this->guzzle = $guzzle;
         $this->output = $output;
@@ -30,7 +23,6 @@ class Server
     public function status()
     {
         $st = microtime(true);
-        $result = $this->guzzle->post('server/status');
         try {
             $result = $this->guzzle->post("server/status");
             $body = $result->getBody();
@@ -49,7 +41,6 @@ class Server
     public function restart_xray()
     {
         $st = microtime(true);
-        $result = $this->guzzle->post('server/restartXrayService');
         try {
             $result = $this->guzzle->post("server/restartXrayService");
             $body = $result->getBody();
@@ -143,10 +134,10 @@ class Server
     private function output(array $data)
     {
         switch ($this->output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;
@@ -160,10 +151,10 @@ class Server
     private function response_output(array $data)
     {
         switch ($this->response_output):
-            case self::OUTPUT_JSON:
+            case Xui::OUTPUT_JSON:
                 $return = json::_out($data, true);
             break;
-            case self::OUTPUT_OBJECT:
+            case Xui::OUTPUT_OBJECT:
                 $data = json::_out($data);
                 $return = json::_in($data);
             break;

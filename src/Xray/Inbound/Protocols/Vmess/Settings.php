@@ -2,9 +2,6 @@
 
 namespace XUI\Xray\Inbound\Protocols\Vmess;
 
-use JSON\json;
-use stdClass;
-
 class Settings
 {
     public array $clients;
@@ -37,13 +34,13 @@ class Settings
     }
 
     public function update_client(
-        string $client_uuid, bool $enable = null, string $uuid = null, string $email = null, int $total_traffic = null,
+        string $client_email, bool $enable = null, string $uuid = null, string $email = null, int $total_traffic = null,
         int    $expiry_time = null, int $limit_ip = null, int $tgid = null, string $subid = null, int $reset = null
     ): bool
     {
         $updated = false;
         foreach ($this->clients as $key => $client):
-            if ($client['id'] == $client_uuid):
+            if ($client['email'] == $client_email):
                 if (!is_null($uuid)) $client['id'] = $uuid;
                 if (!is_null($email)) $client['email'] = $email;
                 if (!is_null($enable)) $client['enable'] = $enable;
@@ -61,11 +58,11 @@ class Settings
         return $updated;
     }
 
-    public function get_client(string $client_uuid): array|false
+    public function get_client(string $client_email): array|false
     {
         $return = false;
         foreach ($this->clients as $key => $client):
-            if ($client['id'] == $client_uuid):
+            if ($client['email'] == $client_email):
                 $return = $this->clients[$key];
                 break;
             endif;
@@ -73,11 +70,11 @@ class Settings
         return $return;
     }
 
-    public function has_client(string $client_uuid): bool
+    public function has_client(string $client_email): bool
     {
         $return = false;
         foreach ($this->clients as $client):
-            if ($client['id'] == $client_uuid):
+            if ($client['email'] == $client_email):
                 $return = true;
                 break;
             endif;
@@ -85,11 +82,11 @@ class Settings
         return $return;
     }
 
-    public function remove_client(string $client_uuid): bool
+    public function remove_client(string $client_email): bool
     {
         $removed = false;
         foreach ($this->clients as $key => $client):
-            if ($client['id'] == $client_uuid):
+            if ($client['email'] == $client_email):
                 unset($this->clients[$key]);
                 $removed = true;
                 break;
