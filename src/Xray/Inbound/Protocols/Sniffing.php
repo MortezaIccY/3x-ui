@@ -1,7 +1,13 @@
 <?php
 
 namespace XUI\Xray\Inbound\Protocols;
-
+/**
+ * @method bool enabled(bool $status = null)
+ * @method array dest_override(array $destinations = null)
+ * @method bool metadata_only(bool $status = null)
+ * @method array domains_excluded(array $domains = null)
+ * @method bool route_only(bool $status = null)
+ */
 class Sniffing
 {
     private bool $enabled;
@@ -22,29 +28,10 @@ class Sniffing
         $this->route_only = $route_only;
     }
 
-    public function enabled(bool $status = null): bool
+    public function __call(string $name, array $arguments)
     {
-        return $status ? $this->enabled = $status : $this->enabled;
-    }
-
-    public function dest_override(array $destinations = null): array
-    {
-        return $destinations ? $this->dest_override = $destinations : $this->dest_override;
-    }
-
-    public function metadata_only(bool $status = null): bool
-    {
-        return $status ? $this->metadata_only = $status : $this->metadata_only;
-    }
-
-    public function domains_excluded(array $domains = null): array
-    {
-        return $domains ? $this->domains_excluded = $domains : $this->domains_excluded;
-    }
-
-    public function route_only(bool $status = null): bool
-    {
-        return $status ? $this->route_only = $status : $this->route_only;
+        $value = array_shift($arguments);
+        return $value ? $this->{$name} = $value : $this->{$name};
     }
 
     /**
