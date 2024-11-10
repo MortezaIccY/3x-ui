@@ -63,7 +63,7 @@ class Xui
         $this->response_output = $response_output;
     }
 
-    public function login($username, $password)
+    public function login($username, $password): object|array|string
     {
         $st = microtime(true);
         if ($this->is_login()) {
@@ -148,35 +148,33 @@ class Xui
         );
     }
 
-    public function output(array $data)
+    private function output(array|object|string $data): object|array|string
     {
         switch ($this->output):
-            case self::OUTPUT_JSON:
-                $return = json::_out($data, true);
+            case Xui::OUTPUT_JSON:
+                $return = json::to_json($data);
             break;
-            case self::OUTPUT_OBJECT:
-                $data = json::_out($data);
-                $return = json::_in($data);
+            case Xui::OUTPUT_OBJECT:
+                $return = json::to_object($data);
             break;
-            default:
-                $return = $data;
+            case Xui::OUTPUT_ARRAY:
+                $return = json::to_array($data);
             break;
         endswitch;
         return $return;
     }
 
-    public function response_output(array $data)
+    private function response_output(array|object|string $data): object|array|string
     {
         switch ($this->response_output):
-            case self::OUTPUT_JSON:
-                $return = json::_out($data, true);
+            case Xui::OUTPUT_JSON:
+                $return = json::to_json($data);
             break;
-            case self::OUTPUT_OBJECT:
-                $data = json::_out($data);
-                $return = json::_in($data);
+            case Xui::OUTPUT_OBJECT:
+                $return = json::to_object($data);
             break;
-            default:
-                $return = $data;
+            case Xui::OUTPUT_ARRAY:
+                $return = json::to_array($data);
             break;
         endswitch;
         return $return;

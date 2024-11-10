@@ -26,7 +26,7 @@ class Server
         try {
             $result = $this->guzzle->post("server/status");
             $body = $result->getBody();
-            $response = $this->response_output(json::_in($body->getContents(), true));
+            $response = $this->response_output($body->getContents());
             $et = microtime(true);
             $tt = round($et - $st, 3);
             $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
@@ -44,7 +44,7 @@ class Server
         try {
             $result = $this->guzzle->post("server/restartXrayService");
             $body = $result->getBody();
-            $response = $this->response_output(json::_in($body->getContents(), true));
+            $response = $this->response_output($body->getContents());
             $et = microtime(true);
             $tt = round($et - $st, 3);
             $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
@@ -62,7 +62,7 @@ class Server
         try {
             $result = $this->guzzle->post("server/stopXrayService");
             $body = $result->getBody();
-            $response = $this->response_output(json::_in($body->getContents(), true));
+            $response = $this->response_output($body->getContents());
             $et = microtime(true);
             $tt = round($et - $st, 3);
             $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
@@ -80,7 +80,7 @@ class Server
         try {
             $result = $this->guzzle->post("server/getConfigJson");
             $body = $result->getBody();
-            $response = $this->response_output(json::_in($body->getContents(), true));
+            $response = $this->response_output($body->getContents());
             $et = microtime(true);
             $tt = round($et - $st, 3);
             $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
@@ -103,7 +103,7 @@ class Server
                 ]
             ]);
             $body = $result->getBody();
-            $response = $this->response_output(json::_in($body->getContents(), true));
+            $response = $this->response_output($body->getContents());
             $et = microtime(true);
             $tt = round($et - $st, 3);
             $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
@@ -120,7 +120,7 @@ class Server
         try {
             $result = $this->guzzle->post("server/getNewX25519Cert");
             $body = $result->getBody();
-            $response = $this->response_output(json::_in($body->getContents(), true));
+            $response = $this->response_output($body->getContents());
             $et = microtime(true);
             $tt = round($et - $st, 3);
             $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
@@ -131,35 +131,33 @@ class Server
         }
         return $this->output($return);
     }
-    private function output(array $data)
+    private function output(array|object|string $data): object|array|string
     {
         switch ($this->output):
             case Xui::OUTPUT_JSON:
-                $return = json::_out($data, true);
+                $return = json::to_json($data);
             break;
             case Xui::OUTPUT_OBJECT:
-                $data = json::_out($data);
-                $return = json::_in($data);
+                $return = json::to_object($data);
             break;
-            default:
-                $return = $data;
+            case Xui::OUTPUT_ARRAY:
+                $return = json::to_array($data);
             break;
         endswitch;
         return $return;
     }
 
-    private function response_output(array $data)
+    private function response_output(array|object|string $data): object|array|string
     {
         switch ($this->response_output):
             case Xui::OUTPUT_JSON:
-                $return = json::_out($data, true);
+                $return = json::to_json($data);
             break;
             case Xui::OUTPUT_OBJECT:
-                $data = json::_out($data);
-                $return = json::_in($data);
+                $return = json::to_object($data);
             break;
-            default:
-                $return = $data;
+            case Xui::OUTPUT_ARRAY:
+                $return = json::to_array($data);
             break;
         endswitch;
         return $return;

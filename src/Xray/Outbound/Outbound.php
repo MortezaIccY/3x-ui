@@ -405,35 +405,33 @@ class Outbound
         return $config ?? false;
     }
 
-    private function output(array $data)
+    private function output(array|object|string $data): object|array|string
     {
         switch ($this->output):
             case Xui::OUTPUT_JSON:
-                $return = json::_out($data, true);
+                $return = json::to_json($data);
             break;
             case Xui::OUTPUT_OBJECT:
-                $data = json::_out($data);
-                $return = json::_in($data);
+                $return = json::to_object($data);
             break;
-            default:
-                $return = $data;
+            case Xui::OUTPUT_ARRAY:
+                $return = json::to_array($data);
             break;
         endswitch;
         return $return;
     }
 
-    private function response_output(array $data)
+    private function response_output(array|object|string $data): object|array|string
     {
         switch ($this->response_output):
             case Xui::OUTPUT_JSON:
-                $return = json::_out($data, true);
+                $return = json::to_json($data);
             break;
             case Xui::OUTPUT_OBJECT:
-                $data = json::_out($data);
-                $return = json::_in($data);
+                $return = json::to_object($data);
             break;
-            default:
-                $return = $data;
+            case Xui::OUTPUT_ARRAY:
+                $return = json::to_array($data);
             break;
         endswitch;
         return $return;

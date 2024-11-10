@@ -34,16 +34,16 @@ class Xray
 
     /**
      * Returns Xray json config with inbound tags
-     * @return mixed
+     * @return string|array|object
      * @throws GuzzleException
      */
-    public function get_settings(): mixed
+    public function get_settings(): string|array|object
     {
         $st = microtime(true);
         try {
             $result = $this->guzzle->post("panel/xray");
             $body = $result->getBody();
-            $response = $this->response_output(json::_in($body->getContents(), true));
+            $response = $this->response_output($body->getContents());
             $et = microtime(true);
             $tt = round($et - $st, 3);
             $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
@@ -57,9 +57,9 @@ class Xray
 
     /**
      * Returns only json Xray full config
-     * @return mixed
+     * @return string|array|object
      */
-    public function get_full_config(): mixed
+    public function get_full_config(): string|array|object
     {
         $st = microtime(true);
         try {
@@ -77,7 +77,7 @@ class Xray
         return $this->output($return);
     }
 
-    public function get_config(array|string $config): mixed
+    public function get_config(array|string $config): string|array|object
     {
         $st = microtime(true);
         $last_output = $this->output;
@@ -101,7 +101,7 @@ class Xray
         return $this->output($return);
     }
 
-    public function update_config(array $update)
+    public function update_config(array $update): object|array|string
     {
         $st = microtime(true);
         $last_output = $this->output;
@@ -121,7 +121,7 @@ class Xray
                 ]);
                 $body = $result->getBody();
                 $this->response_output = $last_response_output;
-                $response = $this->response_output(json::_in($body->getContents(), true));
+                $response = $this->response_output($body->getContents());
                 $et = microtime(true);
                 $tt = round($et - $st, 3);
                 $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
@@ -138,13 +138,13 @@ class Xray
         return $this->output($return);
     }
 
-    public function restart()
+    public function restart(): object|array|string
     {
         $st = microtime(true);
         try {
             $result = $this->guzzle->post("panel/setting/restartXrayService");
             $body = $result->getBody();
-            $response = $this->response_output(json::_in($body->getContents(), true));
+            $response = $this->response_output($body->getContents());
             $et = microtime(true);
             $tt = round($et - $st, 3);
             $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
@@ -156,17 +156,18 @@ class Xray
         return $this->output($return);
     }
 
-    public function set_config(array $full_config)
+    public function set_config(array|string $full_config): object|array|string
     {
         $st = microtime(true);
         try {
+            error_log($full_config);
             $result = $this->guzzle->post("panel/xray/update", [
                 'form_params' => [
-                    'xraySetting' => json::_out($full_config)
+                    'xraySetting' => is_array($full_config) ? json::_out($full_config) : $full_config
                 ]
             ]);
             $body = $result->getBody();
-            $response = $this->response_output(json::_in($body->getContents(), true));
+            $response = $this->response_output($body->getContents());
             $et = microtime(true);
             $tt = round($et - $st, 3);
             $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
@@ -178,35 +179,33 @@ class Xray
         return $this->output($return);
     }
 
-    private function output(array $data): mixed
+    private function output(array|object|string $data): object|array|string
     {
         switch ($this->output):
             case Xui::OUTPUT_JSON:
-                $return = json::_out($data, true);
+                $return = json::to_json($data);
             break;
             case Xui::OUTPUT_OBJECT:
-                $data = json::_out($data);
-                $return = json::_in($data);
+                $return = json::to_object($data);
             break;
-            default:
-                $return = $data;
+            case Xui::OUTPUT_ARRAY:
+                $return = json::to_array($data);
             break;
         endswitch;
         return $return;
     }
 
-    private function response_output(array $data): mixed
+    private function response_output(array|object|string $data): object|array|string
     {
         switch ($this->response_output):
             case Xui::OUTPUT_JSON:
-                $return = json::_out($data, true);
+                $return = json::to_json($data);
             break;
             case Xui::OUTPUT_OBJECT:
-                $data = json::_out($data);
-                $return = json::_in($data);
+                $return = json::to_object($data);
             break;
-            default:
-                $return = $data;
+            case Xui::OUTPUT_ARRAY:
+                $return = json::to_array($data);
             break;
         endswitch;
         return $return;

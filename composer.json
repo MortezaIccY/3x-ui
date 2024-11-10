@@ -1,7 +1,6 @@
 {
   "name": "estaheri/3x-ui",
   "description": "An easy to use php library for MHSanaei/3x-ui",
-  "version": "1.0.0",
   "type": "library",
   "keywords": [
     "x-ui",

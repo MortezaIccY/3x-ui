@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "estaheri/json",
-            "version": "1.0.0",
+            "version": "v1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/es-taheri/json.git",
-                "reference": "9d7e7a1fe525b592c743052aec183c9f4b7d48a9"
+                "reference": "98f5bce87bdc8d025631dcb652b84e9113423e98"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/es-taheri/json/zipball/9d7e7a1fe525b592c743052aec183c9f4b7d48a9",
-                "reference": "9d7e7a1fe525b592c743052aec183c9f4b7d48a9",
+                "url": "https://api.github.com/repos/es-taheri/json/zipball/98f5bce87bdc8d025631dcb652b84e9113423e98",
+                "reference": "98f5bce87bdc8d025631dcb652b84e9113423e98",
                 "shasum": ""
             },
             "type": "library",
@@ -49,9 +49,9 @@
             ],
             "support": {
                 "issues": "https://github.com/es-taheri/json/issues",
-                "source": "https://github.com/es-taheri/json/tree/v1.0.0"
+                "source": "https://github.com/es-taheri/json/tree/v1.1.1"
             },
-            "time": "2023-12-25T14:40:52+00:00"
+            "time": "2024-11-10T15:29:07+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
