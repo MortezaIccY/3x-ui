@@ -34,10 +34,9 @@ class Xray
 
     /**
      * Returns Xray json config with inbound tags
-     * @return string|array|object
-     * @throws GuzzleException
+     * @return mixed
      */
-    public function get_settings(): string|array|object
+    public function get_settings(): mixed
     {
         $st = microtime(true);
         try {
@@ -57,9 +56,9 @@ class Xray
 
     /**
      * Returns only json Xray full config
-     * @return string|array|object
+     * @return mixed
      */
-    public function get_full_config(): string|array|object
+    public function get_full_config(): mixed
     {
         $st = microtime(true);
         try {
@@ -77,6 +76,11 @@ class Xray
         return $this->output($return);
     }
 
+    /**
+     * Get a config/configs from xray configs
+     * @param array|string $config
+     * @return string|array|object
+     */
     public function get_config(array|string $config): string|array|object
     {
         $st = microtime(true);
@@ -101,6 +105,11 @@ class Xray
         return $this->output($return);
     }
 
+    /**
+     * Update a config/configs from xray configs
+     * @param array $update
+     * @return object|array|string
+     */
     public function update_config(array $update): object|array|string
     {
         $st = microtime(true);
@@ -138,6 +147,10 @@ class Xray
         return $this->output($return);
     }
 
+    /**
+     * Restart Xray-core
+     * @return object|array|string
+     */
     public function restart(): object|array|string
     {
         $st = microtime(true);
@@ -156,14 +169,19 @@ class Xray
         return $this->output($return);
     }
 
+    /**
+     * change full config of xray config\
+     * Most uses for reset xray configs to default.
+     * @param array|string $full_config
+     * @return object|array|string
+     */
     public function set_config(array|string $full_config): object|array|string
     {
         $st = microtime(true);
         try {
-            error_log($full_config);
             $result = $this->guzzle->post("panel/xray/update", [
                 'form_params' => [
-                    'xraySetting' => is_array($full_config) ? json::_out($full_config) : $full_config
+                    'xraySetting' => json::to_json($full_config)
                 ]
             ]);
             $body = $result->getBody();
@@ -181,33 +199,19 @@ class Xray
 
     private function output(array|object|string $data): object|array|string
     {
-        switch ($this->output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 
     private function response_output(array|object|string $data): object|array|string
     {
-        switch ($this->response_output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->response_output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 }

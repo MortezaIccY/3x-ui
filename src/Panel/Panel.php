@@ -20,6 +20,10 @@ class Panel
         $this->response_output = $response_output;
     }
 
+    /**
+     * Get panel full settings
+     * @return object|array|string
+     */
     public function all_settings(): object|array|string
     {
         $st = microtime(true);
@@ -38,12 +42,22 @@ class Panel
         return $this->output($return);
     }
 
-    public function get_setting(array|string $setting)
+    /**
+     * Get a setting/settings from panel settings
+     * @param array|string $setting
+     * @return mixed
+     */
+    public function get_setting(array|string $setting): mixed
     {
         $panel_settings = new Settings($this->all_settings());
         return $panel_settings->get($setting);
     }
 
+    /**
+     * Update panel settings
+     * @param array $settings
+     * @return object|array|string
+     */
     public function update_setting(array $settings): object|array|string
     {
         $st = microtime(true);
@@ -66,6 +80,10 @@ class Panel
         return $this->output($return);
     }
 
+    /**
+     * Restart panel
+     * @return object|array|string
+     */
     public function restart(): object|array|string
     {
         $st = microtime(true);
@@ -84,6 +102,10 @@ class Panel
         return $this->output($return);
     }
 
+    /**
+     * Get default xray config based on panel&xray-core version
+     * @return object|array|string
+     */
     public function default_xray_config(): object|array|string
     {
         $st = microtime(true);
@@ -104,33 +126,19 @@ class Panel
 
     private function output(array|object|string $data): object|array|string
     {
-        switch ($this->output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 
     private function response_output(array|object|string $data): object|array|string
     {
-        switch ($this->response_output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->response_output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 }

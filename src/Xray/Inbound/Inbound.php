@@ -400,7 +400,13 @@ class Inbound
         }
         return $this->output($return);
     }
-    public function get_client_ips($client_email)
+
+    /**
+     * Get IPLimit log of connected ips to a client of inbound
+     * @param string $client_email
+     * @return object|array|string
+     */
+    public function get_client_ips(string $client_email): object|array|string
     {
         $st = microtime(true);
         try {
@@ -418,7 +424,58 @@ class Inbound
         return $this->output($return);
     }
 
-    public function onlines()
+    /**
+     * Clear IPLimit log of connected ips to a client of inbound
+     * @param string $client_email
+     * @return object|array|string
+     */
+    public function clear_client_ips(string $client_email): object|array|string
+    {
+        $st = microtime(true);
+        try {
+            $result = $this->guzzle->post("panel/inbound/clearClientIps/$client_email");
+            $body = $result->getBody();
+            $response = $this->response_output($body->getContents());
+            $et = microtime(true);
+            $tt = round($et - $st, 3);
+            $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
+        } catch (GuzzleException $err) {
+            $error_code = $err->getCode();
+            $error = $err->getMessage();
+            $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
+        }
+        return $this->output($return);
+    }
+
+    /**
+     * Reset a client of inbound traffic usage
+     * @param int $inbound_id
+     * @param string $client_email
+     * @return object|array|string
+     */
+    public function reset_client_traffic(int $inbound_id, string $client_email): object|array|string
+    {
+        $st = microtime(true);
+        try {
+            $result = $this->guzzle->post("panel/inbound/$inbound_id/resetClientTraffic/$client_email");
+            $body = $result->getBody();
+            $response = $this->response_output($body->getContents());
+            $et = microtime(true);
+            $tt = round($et - $st, 3);
+            $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
+        } catch (GuzzleException $err) {
+            $error_code = $err->getCode();
+            $error = $err->getMessage();
+            $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
+        }
+        return $this->output($return);
+    }
+
+    /**
+     * Get online inbounds by their clients' email
+     * @return object|array|string
+     */
+    public function onlines(): object|array|string
     {
         $st = microtime(true);
         try {
@@ -443,11 +500,7 @@ class Inbound
      */
     public static function read(array|string|object $inbound): Http|Socks|Vless|false|Trojan|Shadowsocks|Vmess|DokodemoDoor
     {
-        $inbound = match (true) {
-            (is_array($inbound)) => json::_in(json::_out($inbound)),
-            (is_string($inbound) && json::_is($inbound)) => json::_in($inbound),
-            default => $inbound
-        };
+        $inbound = json::to_object($inbound);
         if (is_object($inbound)) {
             switch ($inbound->protocol):
                 case 'vmess':
@@ -645,33 +698,19 @@ class Inbound
 
     private function output(array|object|string $data): object|array|string
     {
-        switch ($this->output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 
     private function response_output(array|object|string $data): object|array|string
     {
-        switch ($this->response_output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->response_output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 }

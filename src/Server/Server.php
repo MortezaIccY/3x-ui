@@ -20,7 +20,11 @@ class Server
         $this->response_output = $response_output;
     }
 
-    public function status()
+    /**
+     * Get Server&Panel&Xray-core status and information
+     * @return object|array|string
+     */
+    public function status(): object|array|string
     {
         $st = microtime(true);
         try {
@@ -38,7 +42,11 @@ class Server
         return $this->output($return);
     }
 
-    public function restart_xray()
+    /**
+     * Restart Xray-core to apply any changes made on xray config
+     * @return object|array|string
+     */
+    public function restart_xray(): object|array|string
     {
         $st = microtime(true);
         try {
@@ -56,7 +64,11 @@ class Server
         return $this->output($return);
     }
 
-    public function stop_xray()
+    /**
+     * Stop Xray-core
+     * @return object|array|string
+     */
+    public function stop_xray(): object|array|string
     {
         $st = microtime(true);
         try {
@@ -74,7 +86,12 @@ class Server
         return $this->output($return);
     }
 
-    public function get_xray_config()
+    /**
+     * Get full config of xray config
+     * @link https://xtls.github.io/en/config/
+     * @return object|array|string
+     */
+    public function get_xray_config(): object|array|string
     {
         $st = microtime(true);
         try {
@@ -92,7 +109,14 @@ class Server
         return $this->output($return);
     }
 
-    public function get_xui_log(int $count = 10, string $level = 'notice', bool $syslog = true)
+    /**
+     * Get xui log
+     * @param int $count
+     * @param string $level
+     * @param bool $syslog
+     * @return object|array|string
+     */
+    public function get_xui_log(int $count = 10, string $level = 'notice', bool $syslog = true): object|array|string
     {
         $st = microtime(true);
         try {
@@ -114,7 +138,12 @@ class Server
         }
         return $this->output($return);
     }
-    public function get_x25519_cert()
+
+    /**
+     * Get x25519 certificate for reality
+     * @return object|array|string
+     */
+    public function get_x25519_cert(): object|array|string
     {
         $st = microtime(true);
         try {
@@ -131,35 +160,22 @@ class Server
         }
         return $this->output($return);
     }
+
     private function output(array|object|string $data): object|array|string
     {
-        switch ($this->output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 
     private function response_output(array|object|string $data): object|array|string
     {
-        switch ($this->response_output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->response_output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 }

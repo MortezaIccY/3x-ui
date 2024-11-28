@@ -23,6 +23,12 @@ class Reverse
         $this->response_output = $response_output;
     }
 
+    /**
+     * Load reverse configurations from xray config
+     * <h4>Must be called before using reverse!</h4>
+     * @return void
+     */
+
     public function load(): bool
     {
         $this->xray = new Xray($this->guzzle, Xui::OUTPUT_ARRAY, Xui::OUTPUT_ARRAY);
@@ -37,7 +43,38 @@ class Reverse
         }
     }
 
-    public function add_bridge(string $tag, string $domain = 'reverse.xui')
+    /**
+     *  Update reverse configuration based on current configs.
+     * @return object|string|array
+     */
+    public function update(): object|string|array
+    {
+        $st = microtime(true);
+        $reverse = [
+            'bridges' => $this->bridges
+        ];
+        if (!empty($this->portals)) $reverse['portals'] = $this->portals;
+        $result = $this->xray->update_config([
+            'reverse' => $reverse
+        ]);
+        if ($result['ok']) {
+            $response = $result['response'];
+            $et = microtime(true);
+            $tt = round($et - $st, 3);
+            $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $tt];
+        } else {
+            $return = $result;
+        }
+        return $this->output($return);
+    }
+
+    /**
+     * Add bridge to reverse
+     * @param string $tag
+     * @param string $domain
+     * @return object|array|string
+     */
+    public function add_bridge(string $tag, string $domain = 'reverse.xui'): object|array|string
     {
         $st = microtime(true);
         $this->bridges[] = [
@@ -62,7 +99,12 @@ class Reverse
         return $this->output($return);
     }
 
-    public function get_bridge(string $bridge_tag)
+    /**
+     * Get a bridge from reverse
+     * @param string $bridge_tag
+     * @return object|array|string
+     */
+    public function get_bridge(string $bridge_tag): object|array|string
     {
         $st = microtime(true);
         $return = ['ok' => false, 'error_code' => 404, 'error' => 'reverse bridge not found'];
@@ -77,7 +119,14 @@ class Reverse
         return $this->output($return);
     }
 
-    public function update_bridge(string $bridge_tag, string $tag = null, string $domain = null)
+    /**
+     * Update a bridge from reverse
+     * @param string $bridge_tag
+     * @param string|null $tag
+     * @param string|null $domain
+     * @return object|array|string
+     */
+    public function update_bridge(string $bridge_tag, string $tag = null, string $domain = null): object|array|string
     {
         $st = microtime(true);
         $return = ['ok' => false, 'error_code' => 404, 'error' => 'reverse bridge not found'];
@@ -107,7 +156,12 @@ class Reverse
         return $this->output($return);
     }
 
-    public function delete_bridge(string $bridge_tag)
+    /**
+     * Delete a bridge from reverse
+     * @param string $bridge_tag
+     * @return object|array|string
+     */
+    public function delete_bridge(string $bridge_tag): object|array|string
     {
         $st = microtime(true);
         $deleted = false;
@@ -140,6 +194,11 @@ class Reverse
         return $this->output($return);
     }
 
+    /**
+     * Check the bridge availability
+     * @param string $bridge_tag
+     * @return bool
+     */
     public function has_bridge(string $bridge_tag): bool
     {
         $return = false;
@@ -152,7 +211,13 @@ class Reverse
         return $return;
     }
 
-    public function add_portal(string $tag, string $domain = 'reverse.xui')
+    /**
+     * Add portal to reverse
+     * @param string $tag
+     * @param string $domain
+     * @return object|array|string
+     */
+    public function add_portal(string $tag, string $domain = 'reverse.xui'): object|array|string
     {
         $st = microtime(true);
         $this->portals[] = [
@@ -177,7 +242,12 @@ class Reverse
         return $this->output($return);
     }
 
-    public function get_portal(string $portal_tag)
+    /**
+     * Get a portal from reverse
+     * @param string $portal_tag
+     * @return object|array|string
+     */
+    public function get_portal(string $portal_tag): object|array|string
     {
         $st = microtime(true);
         $return = ['ok' => false, 'error_code' => 404, 'error' => 'reverse portal not found'];
@@ -192,7 +262,14 @@ class Reverse
         return $this->output($return);
     }
 
-    public function update_portal(string $portal_tag, string $tag = null, string $domain = null)
+    /**
+     * Update a portal from reverse
+     * @param string $portal_tag
+     * @param string|null $tag
+     * @param string|null $domain
+     * @return object|array|string
+     */
+    public function update_portal(string $portal_tag, string $tag = null, string $domain = null): object|array|string
     {
         $st = microtime(true);
         $return = ['ok' => false, 'error_code' => 404, 'error' => 'reverse portal not found'];
@@ -222,7 +299,12 @@ class Reverse
         return $this->output($return);
     }
 
-    public function delete_portal(string $portal_tag)
+    /**
+     * Delete a portal from reverse
+     * @param string $portal_tag
+     * @return object|array|string
+     */
+    public function delete_portal(string $portal_tag): object|array|string
     {
         $st = microtime(true);
         $deleted = false;
@@ -255,6 +337,11 @@ class Reverse
         return $this->output($return);
     }
 
+    /**
+     * Check the portal availability on reverse
+     * @param string $portal_tag
+     * @return bool
+     */
     public function has_portal(string $portal_tag): bool
     {
         $return = false;
@@ -269,33 +356,19 @@ class Reverse
 
     private function output(array|object|string $data): object|array|string
     {
-        switch ($this->output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 
     private function response_output(array|object|string $data): object|array|string
     {
-        switch ($this->response_output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->response_output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 }

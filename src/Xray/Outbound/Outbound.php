@@ -36,10 +36,19 @@ class Outbound
         $this->response_output = $response_output;
     }
 
+    /**
+     * Add outbound
+     * @param string $tag
+     * @param Vmess|Vless|Trojan|Shadowsocks|Socks|Http|Freedom|Dns|Blackhole $config
+     * @param array|null $proxy_settings
+     * @param string $send_through
+     * @param array $mux
+     * @return object|array|string
+     */
     public function add(
         string $tag, Vmess|Vless|Trojan|Shadowsocks|Socks|Http|Freedom|Dns|Blackhole $config, array $proxy_settings = null,
         string $send_through = '0.0.0.0', array $mux = []
-    )
+    ): object|array|string
     {
         $st = microtime(true);
         $protocol = $config->protocol;
@@ -80,13 +89,23 @@ class Outbound
         return $this->output($return);
     }
 
-    public function list()
+    /**
+     * List all outbounds from xray config.\
+     * Similar $xray->get_config('outbounds')
+     * @return mixed
+     */
+    public function list(): mixed
     {
         $xray = new Xray($this->guzzle, $this->output, $this->response_output);
         return $xray->get_config('outbounds');
     }
 
-    public function get(string $outbound_tag)
+    /**
+     * Get an outbound
+     * @param string $outbound_tag
+     * @return object|array|string
+     */
+    public function get(string $outbound_tag): object|array|string
     {
         $st = microtime(true);
         $xray = new Xray($this->guzzle, Xui::OUTPUT_ARRAY, Xui::OUTPUT_ARRAY);
@@ -115,6 +134,11 @@ class Outbound
         return $this->output($return);
     }
 
+    /**
+     * Check outbound availability.
+     * @param string $outbound_tag
+     * @return bool
+     */
     public function exist(string $outbound_tag): bool
     {
         $xray = new Xray($this->guzzle, Xui::OUTPUT_ARRAY, Xui::OUTPUT_ARRAY);
@@ -134,10 +158,20 @@ class Outbound
         return $exist;
     }
 
+    /**
+     * Update an outbound
+     * @param string $outbound_tag
+     * @param string|null $tag
+     * @param Vmess|Vless|Trojan|Shadowsocks|Socks|Http|Freedom|Dns|Blackhole|null $config
+     * @param array|null $proxy_settings
+     * @param string|null $send_through
+     * @param array|null $mux
+     * @return object|array|string
+     */
     public function update(
         string $outbound_tag, string $tag = null, Vmess|Vless|Trojan|Shadowsocks|Socks|Http|Freedom|Dns|Blackhole $config = null,
         array  $proxy_settings = null, string $send_through = null, array $mux = null
-    )
+    ): object|array|string
     {
         $st = microtime(true);
         $xray = new Xray($this->guzzle, Xui::OUTPUT_ARRAY, Xui::OUTPUT_ARRAY);
@@ -200,6 +234,11 @@ class Outbound
         return $this->output($return);
     }
 
+    /**
+     * Delete an outbound
+     * @param string $outbound_tag
+     * @return mixed
+     */
     public function delete(string $outbound_tag): mixed
     {
         $st = microtime(true);
@@ -238,41 +277,42 @@ class Outbound
         return $this->output($return);
     }
 
-    public static function read(array|string|object $inbound): Http|Socks|Vless|false|Trojan|Shadowsocks|Vmess
+    /**
+     * Read outbound
+     * @param array|string|object $inbound
+     * @return Http|Socks|Vless|false|Trojan|Shadowsocks|Vmess
+     */
+    public static function read(array|string|object $outbound): Http|Socks|Vless|false|Trojan|Shadowsocks|Vmess
     {
-        $inbound = match (true) {
-            (is_array($inbound)) => json::_in(json::_out($inbound)),
-            (is_string($inbound) && json::_is($inbound)) => json::_in($inbound),
-            default => $inbound
-        };
-        if (is_object($inbound)) {
-            switch ($inbound->protocol):
+        $outbound = json::to_object($outbound);
+        if (is_object($outbound)) {
+            switch ($outbound->protocol):
                 case 'vmess':
-                    $settings = $inbound->settings;
-                    $stream = $inbound->streamSettings;
+                    $settings = $outbound->settings;
+                    $stream = $outbound->streamSettings;
                     $config = new Vmess(json::_out($settings), json::_out($stream));
                 break;
                 case 'vless':
-                    $settings = $inbound->settings;
-                    $stream = $inbound->streamSettings;
+                    $settings = $outbound->settings;
+                    $stream = $outbound->streamSettings;
                     $config = new Vless(json::_out($settings), json::_out($stream));
                 break;
                 case 'trojan':
-                    $settings = $inbound->settings;
-                    $stream = $inbound->streamSettings;
+                    $settings = $outbound->settings;
+                    $stream = $outbound->streamSettings;
                     $config = new Trojan(json::_out($settings), json::_out($stream));
                 break;
                 case 'shadowsocks':
-                    $settings = $inbound->settings;
-                    $stream = $inbound->streamSettings;
+                    $settings = $outbound->settings;
+                    $stream = $outbound->streamSettings;
                     $config = new Shadowsocks(json::_out($settings), json::_out($stream));
                 break;
                 case 'socks':
-                    $settings = $inbound->settings;
+                    $settings = $outbound->settings;
                     $config = new Socks(json::_out($settings));
                 break;
                 case 'http':
-                    $settings = $inbound->settings;
+                    $settings = $outbound->settings;
                     $config = new Http(json::_out($settings));
                 break;
             endswitch;
@@ -283,6 +323,13 @@ class Outbound
     }
 
 
+    /**
+     * Convert outbound to inbound
+     * @param Vmess|Vless|Trojan|Shadowsocks|Socks|Http $outbound_config
+     * @param string $listen
+     * @param int|null $port
+     * @return ib_Vmess|ib_Vless|ib_Trojan|ib_Shadowsocks|ib_Socks|ib_Http|false
+     */
     public static function to_inbound(
         Vmess|Vless|Trojan|Shadowsocks|Socks|Http $outbound_config, string $listen = '', int|null $port = null
     ): ib_Vmess|ib_Vless|ib_Trojan|ib_Shadowsocks|ib_Socks|ib_Http|false
@@ -294,14 +341,14 @@ class Outbound
                 $stream = $outbound_config->stream_settings;
                 $config = new ib_Vmess($listen, $port);
                 $config_settings = new \XUI\Xray\Inbound\Protocols\Vmess\Settings();
-                $config_settings->add_client(true,$settings->users[0]['id']);
+                $config_settings->add_client(true, $settings->users[0]['id']);
             break;
             case 'vless':
                 $settings = $outbound_config->settings;
                 $stream = $outbound_config->stream_settings;
                 $config = new ib_Vless($listen, $port);
                 $config_settings = new \XUI\Xray\Inbound\Protocols\Vless\Settings();
-                $config_settings->add_client(true,$settings->users[0]['id']);
+                $config_settings->add_client(true, $settings->users[0]['id']);
             break;
             case 'trojan':
                 $settings = $outbound_config->settings;
@@ -407,33 +454,19 @@ class Outbound
 
     private function output(array|object|string $data): object|array|string
     {
-        switch ($this->output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 
     private function response_output(array|object|string $data): object|array|string
     {
-        switch ($this->response_output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->response_output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 }

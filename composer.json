@@ -22,7 +22,7 @@
   ],
   "require": {
     "guzzlehttp/guzzle": "^7.8",
-    "estaheri/json": "^1.0"
+    "estaheri/json": "^v1.1.1"
   },
   "autoload": {
     "psr-4": {

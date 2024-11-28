@@ -63,6 +63,13 @@ class Xui
         $this->response_output = $response_output;
     }
 
+    /**
+     * Login to xui panel\
+     * Uses cookie session if logged in before.
+     * @param $username
+     * @param $password
+     * @return object|array|string
+     */
     public function login($username, $password): object|array|string
     {
         $st = microtime(true);
@@ -111,6 +118,11 @@ class Xui
         }
     }
 
+    /**
+     * Generate any random string
+     * @param int $length
+     * @return string
+     */
     public static function random(int $length = 32): string
     {
         $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -121,6 +133,10 @@ class Xui
         return $out;
     }
 
+    /**
+     * Generate a uuid
+     * @return string
+     */
     public static function uuid(): string
     {
         return sprintf(
@@ -150,33 +166,19 @@ class Xui
 
     private function output(array|object|string $data): object|array|string
     {
-        switch ($this->output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 
     private function response_output(array|object|string $data): object|array|string
     {
-        switch ($this->response_output):
-            case Xui::OUTPUT_JSON:
-                $return = json::to_json($data);
-            break;
-            case Xui::OUTPUT_OBJECT:
-                $return = json::to_object($data);
-            break;
-            case Xui::OUTPUT_ARRAY:
-                $return = json::to_array($data);
-            break;
-        endswitch;
-        return $return;
+        return match ($this->response_output) {
+            Xui::OUTPUT_JSON => json::to_json($data),
+            Xui::OUTPUT_OBJECT => json::to_object($data),
+            Xui::OUTPUT_ARRAY => json::to_array($data)
+        };
     }
 }
