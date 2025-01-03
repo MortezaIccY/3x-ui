@@ -4,16 +4,19 @@
 ### Readme documention will come soon...
 ## Usage Example:
 ```php
-require_once 'vendor/autoload.php';
-$xui = new \XUI\Xui($xui_host, $xui_port, $xui_path, $xui_ssl);
+use XUI\Xray\Inbound\Protocols\Vmess\Vmess;
+use XUI\Xui;
+
+require_once __DIR__.'/vendor/autoload.php';
+$xui = new Xui($xui_host, $xui_port, $xui_path, $xui_ssl);
 $result = $xui->login($username, $password);
 @$response = $result->repsonse;
 if ($result->ok && $response->success) {
     $xui_inbound = $xui->xray->inbound;
-    $config = new \XUI\Xray\Inbound\Protocols\Vmess\Vmess();
+    $config = new Vmess();
     $config->settings->add_client();
     $config->stream_settings->ws_settings(false, '/3x-ui');
-    $result = $xui_inbound->add($config, 'Test 3x-ui', 100 * \XUI\Xui::UNIT_GIGABYTE, 86400);
+    $result = $xui_inbound->add($config, 'Test 3x-ui', 100 * Xui::UNIT_GIGABYTE, 86400);
     @$response = $result->repsonse;
     if ($result->ok && $response->success) {
         $inbound_id = $response->obj->id;
