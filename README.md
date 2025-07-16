@@ -55,7 +55,7 @@ $xui->xray; // Accessing to xray methods (Inbounds,Outbounds,Routing,...)
 $xui->panel; // Accessing to panel methods (Restart panel,Update/Get settings,...)
 ```
 
-## Full Documentation (Not completed!)
+## Full Documentation
 
 [New Xui](#new-xui)
 
