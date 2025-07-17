@@ -55,7 +55,7 @@ $xui->xray; // Accessing to xray methods (Inbounds,Outbounds,Routing,...)
 $xui->panel; // Accessing to panel methods (Restart panel,Update/Get settings,...)
 ```
 
-## Full Documentation
+## Full Documentation (Not completed!)
 
 [New Xui](#new-xui)
 
@@ -87,13 +87,101 @@ $xui->panel; // Accessing to panel methods (Restart panel,Update/Get settings,..
 
 ### New Xui
 
+Instantiating `Xui` class for creating connection to 3x-ui
+
+```php
+$xui = new \XUI\Xui($host, $port, $uri_path, $has_ssl, $cookie_dir, $timeout, $proxy, $output, $response_output);
+#---------------------------------------------------------------------------------
+$host = 'localhost'; // Host address of 3x-ui panel. (Accepts Domain/Subdomain/Ipv4)
+$port = 12345; // Port of 3x-ui panel. (1-65535)
+$uri_path = '/'; // URI path of 3x-ui panel.
+$has_ssl = false; // Does panel has SSL. (Default: FALSE)
+$cookie_dir = __DIR__ . '/.cookie'; //
+$timeout = 10; // HTTP Requests timeout
+$proxy = null; // HTTP Requests proxy
+$output = \XUI\Xui::OUTPUT_OBJECT; // Type of return value of methods. Use Xui::OUTPUT_xxx to set. (Accepts json,object,array)
+$response_output = \XUI\Xui::OUTPUT_OBJECT; // Type of response value of requests. Use Xui::OUTPUT_xxx to set. (Accepts json,object,array)
+```
+
 - #### Login
+
+After instantiating `Xui` class must use this method to login to panel.
+> [!Note]
+> Library automatically use cookie if login recently
+
+```php
+$xui->login($username,$password);
+#---------------------------------------------------------------------------------
+$username = 'admin'; // Panel login username
+$password = 'xxxx'; // Panel login password
+```
+
 - #### Random
+
+An static method for generating random string
+
+```php
+\XUI\Xui::random($length);
+$length = 32; // Length of random string
+```
+
 - #### Uuid
+
+An static method for generating random uuid useful to set inbound/outbounds clients uuid
+
+```php
+\XUI\Xui::uuid();
+```
 
 ### Xray
 
+A property to accessing Xray configs including Inbound,Outbound,Routing,Reverse,Others and restarting xray-core.
+
+```php
+$xray = $xui->xray;
+```
+
 - #### Inbound
+
+A property to accessing Xray configs inbounds.
+
+```php
+$inbound = $xray->inbound;
+```
+
+##### Methods :
+
+```php
+# Add,Delete,Update,Get,Exist inbound
+$inbound->add($config, $remark, $total_traffic, $expiry_time, $download, $upload, $enable);
+$inbound->exist($inbound_id);
+$inbound->list();
+$inbound->get($inbound_id);
+$inbound->update($inbound_id, $config, $remark, $total_traffic, $expiry_time, $download, $upload, $enable);
+$inbound->delete($inbound_id);
+# List,Online inbounds
+$inbound->onlines();
+$inbound->list();
+# Import,Export inbound
+$inbound->export($inbound_id);
+$inbound->import($exported_inbound);
+# Get,Clear client ips of inbound
+$inbound->get_client_ips($client_email);
+$inbound->clear_client_ips($client_email);
+$inbound->reset_client_traffic($inbound_id, $client_email);
+#---------------------------------------------------------------------------------
+$config = new \XUI\Xray\Inbound\Protocols\Vmess\Vmess(); // Configured protocol object oriented class 
+$inbound_id = 123; // ID of inbound
+$remark = 'Me'; // Name of inbound
+$total_traffic = 100 * \XUI\Xui::UNIT_GIGABYTE; // Total traffic of inbound. (Unit: Byte)
+$download = 10 * \XUI\Xui::UNIT_GIGABYTE; // Download traffic usage of inbound. (Unit: Byte)
+$upload = 500 * \XUI\Xui::UNIT_MEGABYTE; // Upload traffic usage of inbound. (Unit: Byte)
+$enable = true; // Enable/Disable inbound
+$expiry_time = time() + (30 * 86400); // Expiry time of inbound. (Unit: unix timestamp in seconds)
+$exported_inbound = 'json'; // Json encoded exported inbound.
+$client_email = 'client1234@localhost'; // Client email on inbound
+```
+
 - #### Outbound
 - #### Routing
 - #### Reverse
