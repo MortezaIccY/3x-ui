@@ -254,11 +254,11 @@ $rule = new \XUI\Xray\Routing\Rule($inbound_tag,$outbound_tag); // Configured ru
 ```
 
 - #### Reverse
-A property to accessing Xray configs **routing**.
+A property to accessing Xray configs **reverse**.
 
 ```php
-$routing = $xray->routing;
-$loaded = $routing->load();
+$reverse = $xray->reverse;
+$loaded = $reverse->load();
 if($loaded)
     echo "ok";
 else
@@ -266,7 +266,7 @@ else
 ```
 
 > [!Note]
-> Before using routing methods must call `load()` method to load routing configs from xray config!
+> Before using reverse methods must call `load()` method to load reverse configs from xray config!
 
 ##### Methods :
 
