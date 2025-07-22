@@ -59,6 +59,9 @@ $xui->panel; // Accessing to panel methods (Restart panel,Update/Get settings,..
 
 ## Full Documentation
 
+[Responses](#responses)\
+[Protocols](#protocols)\
+[Rules](#rules)\
 [New Xui](#new-xui)
 
 * [Login](#login)
@@ -87,9 +90,114 @@ $xui->panel; // Accessing to panel methods (Restart panel,Update/Get settings,..
 * [Restart](#restart)
 * [Default-Xray-Config](#default-xray-config)
 
+### Responses
+
+All methods return value based this document :
+
+- #### Methods Return
+  We have 3 types of methods return value :
+    - Object (Default)
+    - JSON
+    - Array
+
+> [!NOTE]\
+> You can set return type from `$output` property in all classes.\
+> You can set it globally when Calling `Xui` Object-oriented class.
+
+  **General structure of recursive methods :**
+
+  ```php
+    $return = ['ok' => $ok, 'response' => $response, 'size' => $size, 'time_taken' => $time_taken]
+    #---------------------------------------------------------------------------------
+    $ok // Can be true/false based on request success or fail! (bool)
+    $response // response of request returned by panel (string|object|array)
+    $size // Size of response (int)
+    $time_taken // Request time taken in seconds (float)
+  ```
+
+- #### Response
+
+  We have 3 types of response in methods return value :
+  - Object (Default)
+  - JSON
+  - Array
+
+> [!NOTE]\
+> You can set response type from `$response_output` property in all classes.\
+> You can set it globally when Calling `Xui` Object-oriented class.
+
+  **General structure of response :**
+
+  ```php
+    $response = ['success' => $success, 'obj' => $obj, 'msg' => $msg]
+    #---------------------------------------------------------------------------------
+    $success // Can be true/false based on action success or fail! (bool)
+    $obj // data returned. (string|object|array)
+    $msg // Message for fail actions, Similar to error! (string)
+  ```
+
+### Protocols
+You can create a config for inbound/outbound by calling its object-orinted class
+> [!TIP]
+> All variables and properties of protocols and streams classes and methods based on Project X official documentations.\
+> You can find full documentation of protocols and their configuration on [Xtls/Xray official website](https://xtls.github.io/en/)\
+> [Inbound Protocols Docs](https://xtls.github.io/en/config/inbounds/)\
+> [Outbound Protocols Docs](https://xtls.github.io/en/config/outbounds/)\
+> [Inbound/Outbound Streams Docs](https://xtls.github.io/en/config/transport.html)
+```php
+// Create Inbound config
+use XUI\Xray\Inbound\Protocols\Vmess\Vmess;
+$listen = '';
+$port = 12345;
+$config = new Vmess($listen, $port);
+$config->settings->add_client($enable, $uuid, $email, $total_traffic, $expiry_time, $limit_ip, $tgid, $subid, $reset);
+$config->stream_settings->ws_settings($accept_proxy_protocol,$path,$headers);
+#---------------------------------------------------------------------------------
+// Create Outbound config
+use XUI\Xray\Outbound\Protocols\Vmess\Vmess;
+$config = new Vmess();
+$config->settings->address = 'example.3xui.net';
+$config->settings->port = 12345;
+$config->settings->add_user($uuid, $security);
+$config->stream_settings->ws_settings($accept_proxy_protocol, $path, $headers);
+```
+Supported Inbound protocols :
+- Vmess
+- Vless
+- Trojan
+- Shadowsocks
+- Socks
+- Http
+- DokodomoDoor
+
+Supported Outbound protocols :
+- Vmess
+- Vless
+- Trojan
+- Shadowsocks
+- Socks
+- Http
+- Dns
+- Blackhole
+- Freedom
+
+Supported Inbound/Outbound Streams and Security :
+- tcp
+- kcp
+- ws
+- http
+- quic
+- ds
+- grpc
+- sockopt
+- tls
+- reality
+
+### Rules
+
 ### New Xui
 
-Instantiating `Xui` class for creating connection to 3x-ui
+Calling `Xui` Object-oriented class for creating connection to 3x-ui
 
 ```php
 $xui = new \XUI\Xui($host, $port, $uri_path, $has_ssl, $cookie_dir, $timeout, $proxy, $output, $response_output);
@@ -107,21 +215,22 @@ $response_output = \XUI\Xui::OUTPUT_OBJECT; // Type of response value of request
 
 - #### Login
 
-    After instantiating `Xui` class must use this method to login to panel.
-    > [!Note]
-    > Library automatically use cookie if login recently
-    
-    ```php
+  After instantiating `Xui` class must use this method to login to panel.
+
+> [!Note]\
+> Library automatically use cookie if login recently
+
+  ```php
     $xui->login($username,$password);
     #---------------------------------------------------------------------------------
     $username = 'admin'; // Panel login username
     $password = 'xxxx'; // Panel login password
-    ```
+  ```
 
 - #### Random
 
-    An static method for generating random string.
-    
+  An static method for generating random string.
+
     ```php
     \XUI\Xui::random($length);
     $length = 32; // Length of random string
@@ -129,8 +238,8 @@ $response_output = \XUI\Xui::OUTPUT_OBJECT; // Type of response value of request
 
 - #### Uuid
 
-    An static method for generating random uuid useful to set inbound/outbounds clients uuid.
-    
+  An static method for generating random uuid useful to set inbound/outbounds clients uuid.
+
     ```php
     \XUI\Xui::uuid();
     ```
@@ -145,14 +254,14 @@ $xray = $xui->xray;
 
 - #### Inbound
 
-    A property to accessing Xray configs **inbounds**.
-    
+  A property to accessing Xray configs **inbounds**.
+
     ```php
     $inbound = $xray->inbound;
     ```
-    
-    ##### Methods
-    
+
+  ##### Methods
+
     ```php
     # Add,Delete,Update,Get,Exist inbound
     $inbound->add($config, $remark, $total_traffic, $expiry_time, $download, $upload, $enable);
@@ -187,14 +296,14 @@ $xray = $xui->xray;
 
 - #### Outbound
 
-    A property to accessing Xray configs **outbounds**.
-    
+  A property to accessing Xray configs **outbounds**.
+
     ```php
     $outbound = $xray->outbound;
     ```
-    
-    ##### Methods
-    
+
+  ##### Methods
+
     ```php
     # Add,Delete,Update,Get,Exist outbound
     $outbound->add($tag,$config,$proxy_settings,$send_through,$mux);
@@ -217,8 +326,8 @@ $xray = $xui->xray;
 
 - #### Routing
 
-    A property to accessing Xray configs **routing**.
-    
+  A property to accessing Xray configs **routing**.
+
     ```php
     $routing = $xray->routing;
     $loaded = $routing->load();
@@ -227,12 +336,12 @@ $xray = $xui->xray;
     else
         echo 'error';
     ```
-    
-    > [!Note]
-    > Before using routing methods must call `load()` method to load routing configs from xray config!
-    
-    ##### Methods
-    
+
+> [!Note]\
+> Before using routing methods must call `load()` method to load routing configs from xray config!
+
+##### Methods
+
     ```php
     # Set/Get routing domain strategy,domain matcher,balancers
     $routing->domain_strategy();
@@ -266,10 +375,10 @@ $xray = $xui->xray;
         echo 'error';
     ```
 
-  > [!Note]
-  > Before using reverse methods must call `load()` method to load reverse configs from xray config!
+> [!Note]\
+> Before using reverse methods must call `load()` method to load reverse configs from xray config!
 
-  ##### Methods
+##### Methods
 
     ```php
     # Add,Delete,Update,Get,Exist reverse portal
@@ -297,12 +406,13 @@ $xray = $xui->xray;
 - #### Configs
 
   Use these methods for configuring xray core or get xray core configuration.
-  > [!Note]
-  > You must restart xray to apply changes made to xray configurations. \
-  > Use `set_config()` to apply default xray configuration got from `$xui->panel->default_xray_config()` Or set a full
-  > custom xray configuration.
 
-  ##### Methods
+> [!Note]\
+> You must restart xray to apply changes made to xray configurations. \
+> Use `set_config()` to apply default xray configuration got from `$xui->panel->default_xray_config()` Or set a full
+> custom xray configuration.
+
+##### Methods
 
     ```php
     # Get full Xray configs
