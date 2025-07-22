@@ -202,6 +202,39 @@ Supported Inbound/Outbound Streams and Security :
 
 ### Rules
 
+An object-oriented class for creating a routing rule
+
+```php
+use XUI\Xray\Routing\Rule;
+$rule = new Rule($inbound_tag,$outbound_tag);
+// Or
+$rule = Routing::rule($inbound_tag,$outbound_tag);
+```
+
+Get or Set a rule setting :
+
+```php
+$rule->port($value); // return true on success and false on failure
+$port = $rule->port();
+```
+
+Rule settings supported :
+
+```php
+$rule->balancer_tag(); // Corresponds to the identifier of a balancer.
+$rule->user(); // An array where each item represents an email address.
+$rule->network(); // This can be "tcp", "udp", or "tcp,udp".
+$rule->protocol(); // An array where each item represents a protocol. ["http" | "tls" | "bittorrent"]
+$rule->domain_matcher(); // The domain matching algorithm used varies depending on the settings.
+$rule->domain(); // The domain matching algorithm used varies depending on the settings.
+$rule->ip(); // An array where each item represents an IP range.
+$rule->port(); // The target port range
+$rule->source(); // An array where each item represents an IP range in the format of IP, CIDR, GeoIP, or loading IP from a file.
+$rule->source_port(); // The source port
+$rule->attrs(); // A json object with string keys and values, used to detect the HTTP headers of the traffic.
+$rule->type(); // Currently, only the option "field" is supported.
+```
+
 ### New Xui
 
 Calling `Xui` Object-oriented class for creating connection to 3x-ui
@@ -366,7 +399,7 @@ $xray = $xui->xray;
   $rule_inbound_tag = ['inbound-12345','inbound-12346']; // An array where each item represents an identifier.
   $rule_outbound_tag = 'direct'; // Corresponds to the identifier of an outbound.
   $apply = true; // Apply changes to routing in xray config
-  $rule = new \XUI\Xray\Routing\Rule($inbound_tag,$outbound_tag); // Configured rule object oriented class
+  $rule = \XUI\Xray\Routing\Routing::rule($inbound_tag,$outbound_tag); // Configured rule object oriented class
   ```
 
 - #### Reverse
