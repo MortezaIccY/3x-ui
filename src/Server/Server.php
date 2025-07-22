@@ -43,6 +43,84 @@ class Server
     }
 
     /**
+     * Get SQLite database of 3x-ui in file or raw string\
+     * Only return raw database if path not set!\
+     * Set `$path` to get file of database. `(Example: /www/wwwroot/xui.example.com/x-ui.db)`
+     * @param string|null $path
+     * @return array|object|string
+     */
+    public function get_db(string $path = null): object|array|string
+    {
+        $st = microtime(true);
+        try {
+            $result = $this->guzzle->get("server/getDb");
+            $body = $result->getBody();
+            $response = $body->getContents();
+            if (isset($path)) {
+                file_put_contents($path, $response);
+                $et = microtime(true);
+                $tt = round($et - $st, 3);
+                $return = ['ok' => true, 'response' => null, 'size' => $body->getSize(), 'time_taken' => $tt];
+            } else {
+                $return = $response;
+            }
+        } catch (GuzzleException $err) {
+            $error_code = $err->getCode();
+            $error = $err->getMessage();
+            $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
+        }
+        return (is_array($return)) ? $this->output($return) : $return;
+    }
+
+    /**
+     * Import SQLite 3x-ui database to panel\
+     * Set `$path_or_db` path to database file or raw string of database.\
+     * __Warning :__ Username/Password Or Panel access link can be changed based on imported database!\
+     * __Alert :__ This action cannot be reversed!
+     * @param string $path_or_db
+     * @return object|array|string
+     */
+    public function import_db(string $path_or_db): object|array|string
+    {
+        $st = microtime(true);
+        try {
+            if (file_exists($path_or_db)) {
+                $file = $path_or_db;
+                $temp = false;
+            } else {
+                $file = __DIR__ . '/x-ui.db';
+                file_put_contents($file, $path_or_db);
+                chmod($file, 0600);
+                $temp = true;
+            }
+            $file_name = basename($file);
+            $result = $this->guzzle->post("server/importDB", [
+                'multipart' => [
+                    [
+                        'name' => 'db',
+                        'contents' => fopen($file, 'r'),
+                        'filename' => $file_name,
+                        'headers' => [
+                            'Content-Type' => 'application/octet-stream'
+                        ]
+                    ]
+                ]
+            ]);
+            if ($temp) unlink($file);
+            $body = $result->getBody();
+            $response = $this->response_output($body->getContents());
+            $et = microtime(true);
+            $tt = round($et - $st, 3);
+            $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
+        } catch (GuzzleException $err) {
+            $error_code = $err->getCode();
+            $error = $err->getMessage();
+            $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
+        }
+        return $this->output($return);
+    }
+
+    /**
      * Restart Xray-core to apply any changes made on xray config
      * @return object|array|string
      */

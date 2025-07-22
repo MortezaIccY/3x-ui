@@ -24,7 +24,7 @@ class Panel
      * Get panel full settings
      * @return object|array|string
      */
-    public function all_settings(): object|array|string
+    public function settings(): object|array|string
     {
         $st = microtime(true);
         try {
@@ -49,20 +49,20 @@ class Panel
      */
     public function get_setting(array|string $setting): mixed
     {
-        $panel_settings = new Settings($this->all_settings());
+        $panel_settings = new Settings($this->settings());
         return $panel_settings->get($setting);
     }
 
     /**
      * Update panel settings
-     * @param array $settings
+     * @param array $update
      * @return object|array|string
      */
-    public function update_setting(array $settings): object|array|string
+    public function update_setting(array $update): object|array|string
     {
         $st = microtime(true);
-        $panel_settings = new Settings($this->all_settings());
-        $panel_settings->update($settings);
+        $panel_settings = new Settings($this->settings());
+        $panel_settings->update($update);
         try {
             $result = $this->guzzle->post("panel/setting/update", [
                 'form_params' => $panel_settings->settings

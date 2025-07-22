@@ -12,10 +12,6 @@ use XUI\Xray\Xray;
 
 class Xui
 {
-    public bool $has_ssl;
-    public string $host;
-    public string $port;
-    public string $uri_path;
     private string $address;
     private Client $guzzle;
     public int $output;
@@ -31,33 +27,37 @@ class Xui
     public const UNIT_MEGABYTE = 1024 * self::UNIT_KILOBYTE;
     public const UNIT_GIGABYTE = 1024 * self::UNIT_MEGABYTE;
     public const UNIT_TERABYTE = 1024 * self::UNIT_GIGABYTE;
+    private const COOKIE_DIR = __DIR__ . '/.cookie';
 
     public function __construct(
-        $xui_host,
-        $xui_port,
-        $xui_uri_path = '/',
+        $host,
+        $port,
+        $uri_path = '/',
         $has_ssl = false,
-        $cookie_dir = null,
+        $cookie_dir = self::COOKIE_DIR,
         $timeout = 10,
         $proxy = null,
         $output = self::OUTPUT_OBJECT,
         $response_output = self::OUTPUT_OBJECT
     )
     {
-        $this->has_ssl = $has_ssl;
-        $this->host = $xui_host;
-        $this->port = $xui_port;
-        $this->uri_path = $xui_uri_path;
-        if ($this->has_ssl)
-            $this->address = 'https://' . $this->host . ':' . $this->port . $this->uri_path;
+        $uri_path = (empty($uri_path) || $uri_path == '/') ? '/' : $uri_path . '/';
+        if ($has_ssl)
+            $this->address = 'https://' . $host . ':' . $port . $uri_path;
         else
-            $this->address = 'http://' . $this->host . ':' . $this->port . $this->uri_path;
-        $cookie_dir = (is_null($cookie_dir)) ? "$xui_host.cookie" : $cookie_dir . "/$xui_host.cookie";
+            $this->address = 'http://' . $host . ':' . $port . $uri_path;
+        $cookie_path = $cookie_dir . "/$host.cookie";
+        if (!file_exists($cookie_path)) {
+            touch($cookie_path);
+            chmod($cookie_path, 0600);
+        } elseif (fileperms($cookie_path) != 0600) {
+            chmod($cookie_path, 0600);
+        }
         $this->guzzle = new Client([
             'base_uri' => $this->address,
             'timeout' => $timeout,
             'proxy' => $proxy,
-            'cookies' => new FileCookieJar($cookie_dir, true)
+            'cookies' => new FileCookieJar($cookie_path, true)
         ]);
         $this->output = $output;
         $this->response_output = $response_output;

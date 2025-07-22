@@ -34,9 +34,9 @@ class Xray
 
     /**
      * Returns Xray json config with inbound tags
-     * @return mixed
+     * @return string|array|object
      */
-    public function get_settings(): mixed
+    private function get_full_config(): string|array|object
     {
         $st = microtime(true);
         try {
@@ -55,23 +55,43 @@ class Xray
     }
 
     /**
-     * Returns only json Xray full config
-     * @return mixed
+     * Return only inbound tags in response
+     * @return array|object|string
      */
-    public function get_full_config(): mixed
+    public function get_inbound_tags(): object|array|string
     {
-        $st = microtime(true);
-        try {
-            $result = $this->guzzle->post("panel/xray");
-            $body = $result->getBody();
-            $response = $this->response_output(json::_in(json::_in($body->getContents(), true)['obj'], true)['xraySetting']);
-            $et = microtime(true);
-            $tt = round($et - $st, 3);
-            $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
-        } catch (GuzzleException $err) {
-            $error_code = $err->getCode();
-            $error = $err->getMessage();
-            $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
+        $result = json::to_array($this->get_full_config());
+        if ($result['ok']) {
+            $response = json::to_array($result['response']);
+            if ($response['success']) {
+                $obj = json::to_array($response['obj']);
+                $return = ['ok' => true, 'response' => $this->response_output($obj['inboundTags']), 'size' => $result['size'], 'time_taken' => $result['time_taken']];
+            } else {
+                $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $result['time_taken']];
+            }
+        } else {
+            $return = $result;
+        }
+        return $this->output($return);
+    }
+
+    /**
+     * Returns only Xray configs in response
+     * @return string|array|object
+     */
+    public function get_configs(): string|array|object
+    {
+        $result = json::to_array($this->get_full_config());
+        if ($result['ok']) {
+            $response = json::to_array($result['response']);
+            if ($response['success']) {
+                $obj = json::to_array($response['obj']);
+                $return = ['ok' => true, 'response' => $this->response_output($obj['xraySetting']), 'size' => $result['size'], 'time_taken' => $result['time_taken']];
+            } else {
+                $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $result['time_taken']];
+            }
+        } else {
+            $return = $result;
         }
         return $this->output($return);
     }
@@ -84,24 +104,19 @@ class Xray
     public function get_config(array|string $config): string|array|object
     {
         $st = microtime(true);
-        $last_output = $this->output;
-        $this->output = Xui::OUTPUT_ARRAY;
-        $last_response_output = $this->response_output;
-        $this->response_output = Xui::OUTPUT_ARRAY;
-        $full_config = $this->get_full_config();
+        $full_config = json::to_array($this->get_configs());
         if ($full_config['ok']) {
-            $response = $full_config['response'];
-            $xray_settings = new Settings($response);
-            $response = $xray_settings->get($config);
+            $response = json::to_array($full_config['response']);
+            if (!isset($response['success'])):
+                $xray_settings = new Settings($response);
+                $response = $xray_settings->get($config);
+            endif;
             $et = microtime(true);
             $tt = round($et - $st, 3);
-            $this->response_output = $last_response_output;
             $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => null, 'time_taken' => $tt];
         } else {
             $return = ['ok' => false, 'error_code' => $full_config['error_code'], 'error' => $full_config['error']];
         }
-        $this->output = $last_output;
-        $this->response_output = $last_response_output;
         return $this->output($return);
     }
 
@@ -113,37 +128,34 @@ class Xray
     public function update_config(array $update): object|array|string
     {
         $st = microtime(true);
-        $last_output = $this->output;
-        $this->output = Xui::OUTPUT_ARRAY;
-        $last_response_output = $this->response_output;
-        $this->response_output = Xui::OUTPUT_ARRAY;
-        $full_config = $this->get_full_config();
+        $full_config = json::to_array($this->get_configs());
         if ($full_config['ok']) {
-            $response = $full_config['response'];
-            $xray_settings = new Settings($response);
-            $xray_settings->update($update);
-            try {
-                $result = $this->guzzle->post("panel/xray/update", [
-                    'form_params' => [
-                        'xraySetting' => json::_out($xray_settings->settings())
-                    ]
-                ]);
-                $body = $result->getBody();
-                $this->response_output = $last_response_output;
-                $response = $this->response_output($body->getContents());
-                $et = microtime(true);
-                $tt = round($et - $st, 3);
-                $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
-            } catch (GuzzleException $err) {
-                $error_code = $err->getCode();
-                $error = $err->getMessage();
-                $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
+            $response = json::to_array($full_config['response']);
+            if (!isset($response['success'])) {
+                $xray_settings = new Settings($response);
+                $xray_settings->update($update);
+                try {
+                    $result = $this->guzzle->post("panel/xray/update", [
+                        'form_params' => [
+                            'xraySetting' => json::_out($xray_settings->settings())
+                        ]
+                    ]);
+                    $body = $result->getBody();
+                    $response = $this->response_output($body->getContents());
+                    $et = microtime(true);
+                    $tt = round($et - $st, 3);
+                    $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
+                } catch (GuzzleException $err) {
+                    $error_code = $err->getCode();
+                    $error = $err->getMessage();
+                    $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
+                }
+            } else {
+                $return = ['ok' => false, 'error_code' => 503, 'error' => $response['msg']];
             }
         } else {
             $return = ['ok' => false, 'error_code' => $full_config['error_code'], 'error' => $full_config['error']];
         }
-        $this->output = $last_output;
-        $this->response_output = $last_response_output;
         return $this->output($return);
     }
 
@@ -172,10 +184,10 @@ class Xray
     /**
      * change full config of xray config\
      * Most uses for reset xray configs to default.
-     * @param array|string $full_config
+     * @param array|string|object $full_config
      * @return object|array|string
      */
-    public function set_config(array|string $full_config): object|array|string
+    public function set_config(array|string|object $full_config): object|array|string
     {
         $st = microtime(true);
         try {

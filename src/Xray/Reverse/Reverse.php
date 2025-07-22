@@ -32,7 +32,7 @@ class Reverse
     public function load(): bool
     {
         $this->xray = new Xray($this->guzzle, Xui::OUTPUT_ARRAY, Xui::OUTPUT_ARRAY);
-        $result = $this->xray->get_full_config()['response'];
+        $result = $this->xray->get_configs()['response'];
         if (isset($result['reverse'])) {
             $reverse = $result['reverse'];
             if (isset($reverse['bridges'])) $this->bridges = $reverse['bridges'];
@@ -50,10 +50,9 @@ class Reverse
     public function update(): object|string|array
     {
         $st = microtime(true);
-        $reverse = [
-            'bridges' => $this->bridges
-        ];
+        $reverse = [];
         if (!empty($this->portals)) $reverse['portals'] = $this->portals;
+        if (!empty($this->bridges)) $reverse['bridges'] = $this->bridges;
         $result = $this->xray->update_config([
             'reverse' => $reverse
         ]);
@@ -72,31 +71,19 @@ class Reverse
      * Add bridge to reverse
      * @param string $tag
      * @param string $domain
-     * @return object|array|string
+     * @param bool $apply Apply changes to reverse in xray config
+     * @return true|object|array|string
      */
-    public function add_bridge(string $tag, string $domain = 'reverse.xui'): object|array|string
+    public function add_bridge(string $tag, string $domain = 'reverse.xui', bool $apply = true): true|object|array|string
     {
-        $st = microtime(true);
         $this->bridges[] = [
             'tag' => $tag,
             'domain' => $domain
         ];
-        $reverse = [
-            'bridges' => $this->bridges
-        ];
-        if (!empty($this->portals)) $reverse['portals'] = $this->portals;
-        $result = $this->xray->update_config([
-            'reverse' => $reverse
-        ]);
-        if ($result['ok']) {
-            $response = $result['response'];
-            $et = microtime(true);
-            $tt = round($et - $st, 3);
-            $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $tt];
-        } else {
-            $return = $result;
-        }
-        return $this->output($return);
+        if ($apply)
+            return $this->update();
+        else
+            return true;
     }
 
     /**
@@ -124,46 +111,35 @@ class Reverse
      * @param string $bridge_tag
      * @param string|null $tag
      * @param string|null $domain
-     * @return object|array|string
+     * @param bool $apply Apply changes to reverse in xray config
+     * @return true|object|array|string
      */
-    public function update_bridge(string $bridge_tag, string $tag = null, string $domain = null): object|array|string
+    public function update_bridge(string $bridge_tag, string $tag = null, string $domain = null, bool $apply = true): true|object|array|string
     {
-        $st = microtime(true);
-        $return = ['ok' => false, 'error_code' => 404, 'error' => 'reverse bridge not found'];
+        $return = $this->output(['ok' => false, 'error_code' => 404, 'error' => 'reverse bridge not found']);
         foreach ($this->bridges as $key => $bridge):
             if ($bridge_tag == $bridge['tag']):
                 if (!is_null($tag)) $bridge['tag'] = $tag;
                 if (!is_null($tag)) $bridge['domain'] = $domain;
                 $this->bridges[$key] = $bridge;
-                $reverse = [
-                    'bridges' => $this->bridges
-                ];
-                if (!empty($this->portals)) $reverse['portals'] = $this->portals;
-                $result = $this->xray->update_config([
-                    'reverse' => $reverse
-                ]);
-                if ($result['ok']) {
-                    $response = $result['response'];
-                    $et = microtime(true);
-                    $tt = round($et - $st, 3);
-                    $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $tt];
-                } else {
-                    $return = $result;
-                }
+                if ($apply)
+                    $return = $this->update();
+                else
+                    $return = true;
                 break;
             endif;
         endforeach;
-        return $this->output($return);
+        return $return;
     }
 
     /**
      * Delete a bridge from reverse
      * @param string $bridge_tag
-     * @return object|array|string
+     * @param bool $apply Apply changes to reverse in xray config
+     * @return true|object|array|string
      */
-    public function delete_bridge(string $bridge_tag): object|array|string
+    public function delete_bridge(string $bridge_tag, bool $apply = true): true|object|array|string
     {
-        $st = microtime(true);
         $deleted = false;
         foreach ($this->bridges as $key => $bridge):
             if ($bridge_tag == $bridge['tag']):
@@ -173,25 +149,14 @@ class Reverse
             endif;
         endforeach;
         if ($deleted) {
-            $reverse = [
-                'bridges' => $this->bridges
-            ];
-            if (!empty($this->portals)) $reverse['portals'] = $this->portals;
-            $result = $this->xray->update_config([
-                'reverse' => $reverse
-            ]);
-            if ($result['ok']) {
-                $response = $result['response'];
-                $et = microtime(true);
-                $tt = round($et - $st, 3);
-                $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $tt];
-            } else {
-                $return = $result;
-            }
+            if ($apply)
+                $return = $this->update();
+            else
+                $return = true;
         } else {
-            $return = ['ok' => false, 'error_code' => 404, 'error' => 'routing not found'];
+            $return = $this->output(['ok' => false, 'error_code' => 404, 'error' => 'routing not found']);
         }
-        return $this->output($return);
+        return $return;
     }
 
     /**
@@ -215,31 +180,19 @@ class Reverse
      * Add portal to reverse
      * @param string $tag
      * @param string $domain
-     * @return object|array|string
+     * @param bool $apply Apply changes to reverse in xray config
+     * @return true|object|array|string
      */
-    public function add_portal(string $tag, string $domain = 'reverse.xui'): object|array|string
+    public function add_portal(string $tag, string $domain = 'reverse.xui', bool $apply = true): true|object|array|string
     {
-        $st = microtime(true);
         $this->portals[] = [
             'tag' => $tag,
             'domain' => $domain
         ];
-        $reverse = [
-            'portals' => $this->portals
-        ];
-        if (!empty($this->portals)) $reverse['portals'] = $this->portals;
-        $result = $this->xray->update_config([
-            'reverse' => $reverse
-        ]);
-        if ($result['ok']) {
-            $response = $result['response'];
-            $et = microtime(true);
-            $tt = round($et - $st, 3);
-            $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $tt];
-        } else {
-            $return = $result;
-        }
-        return $this->output($return);
+        if ($apply)
+            return $this->update();
+        else
+            return true;
     }
 
     /**
@@ -267,46 +220,35 @@ class Reverse
      * @param string $portal_tag
      * @param string|null $tag
      * @param string|null $domain
-     * @return object|array|string
+     * @param bool $apply Apply changes to reverse in xray config
+     * @return true|object|array|string
      */
-    public function update_portal(string $portal_tag, string $tag = null, string $domain = null): object|array|string
+    public function update_portal(string $portal_tag, string $tag = null, string $domain = null, bool $apply = true): true|object|array|string
     {
-        $st = microtime(true);
-        $return = ['ok' => false, 'error_code' => 404, 'error' => 'reverse portal not found'];
+        $return = $this->output(['ok' => false, 'error_code' => 404, 'error' => 'reverse portal not found']);
         foreach ($this->portals as $key => $portal):
             if ($portal_tag == $portal['tag']):
                 if (!is_null($tag)) $portal['tag'] = $tag;
                 if (!is_null($tag)) $portal['domain'] = $domain;
                 $this->portals[$key] = $portal;
-                $reverse = [
-                    'portals' => $this->portals
-                ];
-                if (!empty($this->portals)) $reverse['portals'] = $this->portals;
-                $result = $this->xray->update_config([
-                    'reverse' => $reverse
-                ]);
-                if ($result['ok']) {
-                    $response = $result['response'];
-                    $et = microtime(true);
-                    $tt = round($et - $st, 3);
-                    $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $tt];
-                } else {
-                    $return = $result;
-                }
+                if ($apply)
+                    $return = $this->update();
+                else
+                    $return = true;
                 break;
             endif;
         endforeach;
-        return $this->output($return);
+        return $return;
     }
 
     /**
      * Delete a portal from reverse
      * @param string $portal_tag
-     * @return object|array|string
+     * @param bool $apply Apply changes to reverse in xray config
+     * @return true|object|array|string
      */
-    public function delete_portal(string $portal_tag): object|array|string
+    public function delete_portal(string $portal_tag, bool $apply = true): true|object|array|string
     {
-        $st = microtime(true);
         $deleted = false;
         foreach ($this->portals as $key => $portal):
             if ($portal_tag == $portal['tag']):
@@ -316,25 +258,14 @@ class Reverse
             endif;
         endforeach;
         if ($deleted) {
-            $reverse = [
-                'portals' => $this->portals
-            ];
-            if (!empty($this->portals)) $reverse['portals'] = $this->portals;
-            $result = $this->xray->update_config([
-                'reverse' => $reverse
-            ]);
-            if ($result['ok']) {
-                $response = $result['response'];
-                $et = microtime(true);
-                $tt = round($et - $st, 3);
-                $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $tt];
-            } else {
-                $return = $result;
-            }
+            if ($apply)
+                $return = $this->update();
+            else
+                $return = true;
         } else {
-            $return = ['ok' => false, 'error_code' => 404, 'error' => 'routing not found'];
+            $return = $this->output(['ok' => false, 'error_code' => 404, 'error' => 'routing not found']);
         }
-        return $this->output($return);
+        return $return;
     }
 
     /**

@@ -4,20 +4,26 @@ namespace XUI\Xray\Routing;
 
 use GuzzleHttp\Client;
 use JSON\json;
+use XUI\Panel\Panel;
 use XUI\Xray\Xray;
 use XUI\Xui;
 
+/**
+ * @method string|bool|null  domain_strategy(string|null $value = null)   Get/Set the domain strategy.<br/>Don't set $value to get value of domain strategy.
+ * @method string|bool|null  domain_matcher(string|null $value = null)    Get/Set the domain matcher.<br/>Don't set $value to get value of domain matcher.
+ * @method array|bool|null   balancers(array|null $value = null)          Get/Set the balancers list.<br/>Don't set $value to get value of balancers.
+ * @method array|bool|null   rules(array|null $value = null)          Get/Set the rules.<br/>Don't set $value to get value of rules.
+ */
 class Routing
 {
     private Client $guzzle;
     private Xray $xray;
     public int $output;
     public int $response_output;
-    public string $domain_strategy;
-    public string $domain_matcher;
-    public array $rules;
-    public array $reverses;
-    public array $balancers;
+    private string $domain_strategy;
+    private string $domain_matcher;
+    private array $rules;
+    private array $balancers;
 
     public function __construct(Client $guzzle, int $output = Xui::OUTPUT_OBJECT, int $response_output = Xui::OUTPUT_OBJECT)
     {
@@ -74,67 +80,25 @@ class Routing
         return $this->output($return);
     }
 
+    public function __call($name, $args)
+    {
+        return empty($args) ? ($this->$name ?? null) : !!($this->$name = $args[0]);
+    }
+
     /**
      * Add rule to routing
-     * @param array|string $inbound_tag
-     * @param string $outbound_tag
-     * @param string|null $balancer_tag
-     * @param array|string|null $user
-     * @param string|null $network
-     * @param array|string|null $protocol
-     * @param string|null $domain_matcher
-     * @param array|string|null $domain
-     * @param array|string|null $ip
-     * @param array|string|null $port
-     * @param array|string|null $source
-     * @param array|string|null $source_port
-     * @param string|null $attrs
-     * @param string $type
-     * @return object|array|string
+     * @param Rule $rule
+     * @param bool $apply Apply changes to routing in xray config
+     * @return true|object|array|string
      */
-    public function add_rule(
-        array|string $inbound_tag, string $outbound_tag, string $balancer_tag = null, array|string $user = null, string $network = null,
-        array|string $protocol = null, string $domain_matcher = null, array|string $domain = null, array|string $ip = null, array|string $port = null,
-        array|string $source = null, array|string $source_port = null, string $attrs = null, string $type = 'field'
-    ): object|array|string
+    public function add_rule(Rule $rule, bool $apply = true): true|object|array|string
     {
-        $st = microtime(true);
-        $inbound_tag = (is_string($inbound_tag)) ? [$inbound_tag] : $inbound_tag;
-        $rule = [
-            'type' => $type,
-            'inboundTag' => $inbound_tag,
-            'outboundTag' => $outbound_tag
-        ];
-        if (!is_null($balancer_tag)) $rule['balancerTag'] = $balancer_tag;
-        if (!is_null($user)) $rule['user'] = is_string($user) ? [$user] : $user;
-        if (!is_null($network)) $rule['network'] = $network;
-        if (!is_null($protocol)) $rule['protocol'] = is_string($protocol) ? [$protocol] : $protocol;
-        if (!is_null($domain_matcher)) $rule['domainMatcher'] = $domain_matcher;
-        if (!is_null($domain)) $rule['domain'] = is_string($domain) ? [$domain] : $domain;
-        if (!is_null($ip)) $rule['ip'] = is_string($ip) ? [$ip] : $ip;
-        if (!is_null($port)) $rule['port'] = is_array($port) ? implode(',', $port) : $port;
-        if (!is_null($source)) $rule['source'] = is_string($source) ? [$source] : $source;
-        if (!is_null($source_port)) $rule['sourcePort'] = is_array($source_port) ? implode(',', $source_port) : $source_port;
-        if (!is_null($attrs)) $rule['attrs'] = $attrs;
-        $this->rules[] = $rule;
-        $routing = [
-            'domainStrategy' => $this->domain_strategy,
-            'rules' => $this->rules
-        ];
-        if (isset($this->domain_matcher)) $routing['domainMatcher'] = $this->domain_matcher;
-        if (isset($this->balancers)) $routing['balancers'] = $this->balancers;
-        $result = $this->xray->update_config([
-            'routing' => $routing
-        ]);
-        if ($result['ok']) {
-            $response = $result['response'];
-            $et = microtime(true);
-            $tt = round($et - $st, 3);
-            $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $tt];
+        $this->rules[] = $rule->rule();
+        if ($apply) {
+            return $this->update();
         } else {
-            $return = $result;
+            return true;
         }
-        return $this->output($return);
     }
 
     /**
@@ -167,84 +131,41 @@ class Routing
      * Update a rule of routing
      * @param string|array $rule_inbound_tag
      * @param string $rule_outbound_tag
-     * @param array|string|null $inbound_tag
-     * @param string|null $outbound_tag
-     * @param string|null $balancer_tag
-     * @param array|string|null $user
-     * @param string|null $network
-     * @param array|string|null $protocol
-     * @param string|null $domain_matcher
-     * @param array|string|null $domain
-     * @param array|string|null $ip
-     * @param array|string|null $port
-     * @param array|string|null $source
-     * @param array|string|null $source_port
-     * @param string|null $attrs
-     * @param string $type
-     * @return string|array|object
+     * @param Rule $rule
+     * @param bool $apply Apply changes to routing in xray config
+     * @return true|object|array|string
      */
-    public function update_rule(
-        string|array $rule_inbound_tag, string $rule_outbound_tag,
-        array|string $inbound_tag = null, string $outbound_tag = null, string $balancer_tag = null, array|string $user = null, string $network = null,
-        array|string $protocol = null, string $domain_matcher = null, array|string $domain = null, array|string $ip = null, array|string $port = null,
-        array|string $source = null, array|string $source_port = null, string $attrs = null, string $type = 'field'
-    ): string|array|object
+    public function update_rule(string|array $rule_inbound_tag, string $rule_outbound_tag, Rule $rule, bool $apply = true): true|object|array|string
     {
-        $st = microtime(true);
         $rule_inbound_tag = (is_string($rule_inbound_tag)) ? [$rule_inbound_tag] : $rule_inbound_tag;
-        $return = ['ok' => false, 'error_code' => 404, 'error' => 'routing rule not found'];
-        foreach ($this->rules as $key => $rule):
+        $return = $this->output(['ok' => false, 'error_code' => 404, 'error' => 'routing rule not found']);
+        foreach ($this->rules as $key => $a_rule):
             $is_same = true;
             foreach ($rule_inbound_tag as $a_inbound_tag):
-                if (isset($rule['inboundTag']) && !in_array($a_inbound_tag, $rule['inboundTag'])) $is_same = false;
+                if (isset($a_rule['inboundTag']) && !in_array($a_inbound_tag, $a_rule['inboundTag'])) $is_same = false;
             endforeach;
-            if ($rule_outbound_tag == $rule['outboundTag'] && $is_same):
-                if (!is_null($inbound_tag)) $rule['inboundTag'] = (is_string($inbound_tag)) ? [$inbound_tag] : $inbound_tag;
-                if (!is_null($outbound_tag)) $rule['outboundTag'] = $outbound_tag;
-                if (!is_null($balancer_tag)) $rule['balancerTag'] = $balancer_tag;
-                if (!is_null($user)) $rule['user'] = is_string($user) ? [$user] : $user;
-                if (!is_null($network)) $rule['network'] = $network;
-                if (!is_null($protocol)) $rule['protocol'] = is_string($protocol) ? [$protocol] : $protocol;
-                if (!is_null($domain_matcher)) $rule['domainMatcher'] = $domain_matcher;
-                if (!is_null($domain)) $rule['domain'] = is_string($domain) ? [$domain] : $domain;
-                if (!is_null($ip)) $rule['ip'] = is_string($ip) ? [$ip] : $ip;
-                if (!is_null($port)) $rule['port'] = is_array($port) ? implode(',', $port) : $port;
-                if (!is_null($source)) $rule['source'] = is_string($source) ? [$source] : $source;
-                if (!is_null($source_port)) $rule['sourcePort'] = is_array($source_port) ? implode(',', $source_port) : $source_port;
-                if (!is_null($attrs)) $rule['attrs'] = $attrs;
-                $this->rules[$key] = $rule;
-                $routing = [
-                    'domainStrategy' => $this->domain_strategy,
-                    'rules' => $this->rules
-                ];
-                if (isset($this->domain_matcher)) $routing['domainMatcher'] = $this->domain_matcher;
-                if (isset($this->balancers)) $routing['balancers'] = $this->balancers;
-                $result = $this->xray->update_config([
-                    'routing' => $routing
-                ]);
-                if ($result['ok']) {
-                    $response = $result['response'];
-                    $et = microtime(true);
-                    $tt = round($et - $st, 3);
-                    $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $tt];
+            if ($rule_outbound_tag == $a_rule['outboundTag'] && $is_same):
+                $this->rules[$key] = $rule->rule();
+                if ($apply) {
+                    $return = $this->update();
                 } else {
-                    $return = $result;
+                    $return = true;
                 }
                 break;
             endif;
         endforeach;
-        return $this->output($return);
+        return $return;
     }
 
     /**
      * Delete a rule from routing
      * @param string|array $rule_inbound_tag
      * @param string $rule_outbound_tag
-     * @return string|array|object
+     * @param bool $apply Apply changes to routing in xray config
+     * @return true|object|array|string
      */
-    public function delete_rule(string|array $rule_inbound_tag, string $rule_outbound_tag): string|array|object
+    public function delete_rule(string|array $rule_inbound_tag, string $rule_outbound_tag, bool $apply = true): true|object|array|string
     {
-        $st = microtime(true);
         $rule_inbound_tag = (is_string($rule_inbound_tag)) ? [$rule_inbound_tag] : $rule_inbound_tag;
         $deleted = false;
         foreach ($this->rules as $key => $rule):
@@ -259,27 +180,14 @@ class Routing
             endif;
         endforeach;
         if ($deleted) {
-            $routing = [
-                'domainStrategy' => $this->domain_strategy,
-                'rules' => $this->rules
-            ];
-            if (isset($this->domain_matcher)) $routing['domainMatcher'] = $this->domain_matcher;
-            if (isset($this->balancers)) $routing['balancers'] = $this->balancers;
-            $result = $this->xray->update_config([
-                'routing' => $routing
-            ]);
-            if ($result['ok']) {
-                $response = $result['response'];
-                $et = microtime(true);
-                $tt = round($et - $st, 3);
-                $return = ['ok' => true, 'response' => $this->response_output($response), 'size' => $result['size'], 'time_taken' => $tt];
-            } else {
-                $return = $result;
-            }
+            if ($apply)
+                $return = $this->update();
+            else
+                $return = true;
         } else {
-            $return = ['ok' => false, 'error_code' => 404, 'error' => 'routing not found'];
+            $return = $this->output(['ok' => false, 'error_code' => 404, 'error' => 'routing not found']);
         }
-        return $this->output($return);
+        return $return;
     }
 
     /**
@@ -304,6 +212,18 @@ class Routing
         endforeach;
         return $return;
     }
+
+    /**
+     * Configure a rule
+     * @param array|string $inbound_tag
+     * @param string $outbound_tag
+     * @return Rule
+     */
+    public static function rule(array|string $inbound_tag, string $outbound_tag): Rule
+    {
+        return new Rule($inbound_tag, $outbound_tag);
+    }
+
 
     private function output(array|object|string $data): object|array|string
     {
