@@ -57,7 +57,7 @@ $xui->xray; // Accessing to xray methods (Inbounds,Outbounds,Routing,...)
 $xui->panel; // Accessing to panel methods (Restart panel,Update/Get settings,...)
 ```
 
-## Full Documentation (Not completed!)
+## Full Documentation
 
 [New Xui](#new-xui)
 
@@ -151,7 +151,7 @@ $xray = $xui->xray;
     $inbound = $xray->inbound;
     ```
     
-    ##### Methods :
+    ##### Methods
     
     ```php
     # Add,Delete,Update,Get,Exist inbound
@@ -193,7 +193,7 @@ $xray = $xui->xray;
     $outbound = $xray->outbound;
     ```
     
-    ##### Methods :
+    ##### Methods
     
     ```php
     # Add,Delete,Update,Get,Exist outbound
@@ -231,7 +231,7 @@ $xray = $xui->xray;
     > [!Note]
     > Before using routing methods must call `load()` method to load routing configs from xray config!
     
-    ##### Methods :
+    ##### Methods
     
     ```php
     # Set/Get routing domain strategy,domain matcher,balancers
@@ -269,7 +269,7 @@ $xray = $xui->xray;
   > [!Note]
   > Before using reverse methods must call `load()` method to load reverse configs from xray config!
 
-  ##### Methods :
+  ##### Methods
 
     ```php
     # Add,Delete,Update,Get,Exist reverse portal
