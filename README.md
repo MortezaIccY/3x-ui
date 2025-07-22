@@ -72,13 +72,13 @@ $xui->panel; // Accessing to panel methods (Restart panel,Update/Get settings,..
 * [Routing](#routing)
 * [Reverse](#reverse)
 * [Configs](#configs)
-* [Restart](#restart)
 
 [Server](#server)
 
 * [Status](#status)
 * [Database](#database)
-* [Xray-Start-Stop](#xray-start-stop)
+* [Xray-Restart-Stop](#xray-restart-stop)
+* [Reality-Certificate](#reality-certificate)
 * [Xui-log](#xui-log)
 
 [Panel](#panel)
@@ -107,33 +107,33 @@ $response_output = \XUI\Xui::OUTPUT_OBJECT; // Type of response value of request
 
 - #### Login
 
-After instantiating `Xui` class must use this method to login to panel.
-> [!Note]
-> Library automatically use cookie if login recently
-
-```php
-$xui->login($username,$password);
-#---------------------------------------------------------------------------------
-$username = 'admin'; // Panel login username
-$password = 'xxxx'; // Panel login password
-```
+    After instantiating `Xui` class must use this method to login to panel.
+    > [!Note]
+    > Library automatically use cookie if login recently
+    
+    ```php
+    $xui->login($username,$password);
+    #---------------------------------------------------------------------------------
+    $username = 'admin'; // Panel login username
+    $password = 'xxxx'; // Panel login password
+    ```
 
 - #### Random
 
-An static method for generating random string
-
-```php
-\XUI\Xui::random($length);
-$length = 32; // Length of random string
-```
+    An static method for generating random string.
+    
+    ```php
+    \XUI\Xui::random($length);
+    $length = 32; // Length of random string
+    ```
 
 - #### Uuid
 
-An static method for generating random uuid useful to set inbound/outbounds clients uuid
-
-```php
-\XUI\Xui::uuid();
-```
+    An static method for generating random uuid useful to set inbound/outbounds clients uuid.
+    
+    ```php
+    \XUI\Xui::uuid();
+    ```
 
 ### Xray
 
@@ -145,169 +145,267 @@ $xray = $xui->xray;
 
 - #### Inbound
 
-A property to accessing Xray configs **inbounds**.
-
-```php
-$inbound = $xray->inbound;
-```
-
-##### Methods :
-
-```php
-# Add,Delete,Update,Get,Exist inbound
-$inbound->add($config, $remark, $total_traffic, $expiry_time, $download, $upload, $enable);
-$inbound->exist($inbound_id);
-$inbound->get($inbound_id);
-$inbound->update($inbound_id, $config, $remark, $total_traffic, $expiry_time, $download, $upload, $enable);
-$inbound->delete($inbound_id);
-# List,Online inbounds
-$inbound->onlines();
-$inbound->list();
-# Import,Export inbound
-$inbound->export($inbound_id);
-$inbound->import($exported_inbound);
-# Get,Clear client ips of inbound
-$inbound->get_client_ips($client_email);
-$inbound->clear_client_ips($client_email);
-$inbound->reset_client_traffic($inbound_id, $client_email);
-#---------------------------------------------------------------------------------
-$config = new \XUI\Xray\Inbound\Protocols\Vmess\Vmess(); // Configured protocol object oriented class 
-$config->settings->add_client();
-$config->stream_settings->ws_settings(false, '/');
-$inbound_id = 123; // ID of inbound
-$remark = 'Me'; // Name of inbound
-$total_traffic = 100 * \XUI\Xui::UNIT_GIGABYTE; // Total traffic of inbound. (Unit: Byte)
-$download = 10 * \XUI\Xui::UNIT_GIGABYTE; // Download traffic usage of inbound. (Unit: Byte)
-$upload = 500 * \XUI\Xui::UNIT_MEGABYTE; // Upload traffic usage of inbound. (Unit: Byte)
-$enable = true; // Enable/Disable inbound
-$expiry_time = time() + (30 * 86400); // Expiry time of inbound. (Unit: unix timestamp in seconds)
-$exported_inbound = 'json'; // Json encoded exported inbound.
-$client_email = 'client1234@localhost'; // Client email on inbound
-```
+    A property to accessing Xray configs **inbounds**.
+    
+    ```php
+    $inbound = $xray->inbound;
+    ```
+    
+    ##### Methods :
+    
+    ```php
+    # Add,Delete,Update,Get,Exist inbound
+    $inbound->add($config, $remark, $total_traffic, $expiry_time, $download, $upload, $enable);
+    $inbound->exist($inbound_id);
+    $inbound->get($inbound_id);
+    $inbound->update($inbound_id, $config, $remark, $total_traffic, $expiry_time, $download, $upload, $enable);
+    $inbound->delete($inbound_id);
+    # List,Online inbounds
+    $inbound->onlines();
+    $inbound->list();
+    # Import,Export inbound
+    $inbound->export($inbound_id);
+    $inbound->import($exported_inbound);
+    # Get,Clear client ips of inbound
+    $inbound->get_client_ips($client_email);
+    $inbound->clear_client_ips($client_email);
+    $inbound->reset_client_traffic($inbound_id, $client_email);
+    #---------------------------------------------------------------------------------
+    $config = new \XUI\Xray\Inbound\Protocols\Vmess\Vmess(); // Configured protocol object oriented class 
+    $config->settings->add_client();
+    $config->stream_settings->ws_settings(false, '/');
+    $inbound_id = 123; // ID of inbound
+    $remark = 'Me'; // Name of inbound
+    $total_traffic = 100 * \XUI\Xui::UNIT_GIGABYTE; // Total traffic of inbound. (Unit: Byte)
+    $download = 10 * \XUI\Xui::UNIT_GIGABYTE; // Download traffic usage of inbound. (Unit: Byte)
+    $upload = 500 * \XUI\Xui::UNIT_MEGABYTE; // Upload traffic usage of inbound. (Unit: Byte)
+    $enable = true; // Enable/Disable inbound
+    $expiry_time = time() + (30 * 86400); // Expiry time of inbound. (Unit: unix timestamp in seconds)
+    $exported_inbound = 'json'; // Json encoded exported inbound.
+    $client_email = 'client1234@localhost'; // Client email on inbound
+    ```
 
 - #### Outbound
 
-A property to accessing Xray configs **outbounds**.
-
-```php
-$outbound = $xray->outbound;
-```
-
-##### Methods :
-
-```php
-# Add,Delete,Update,Get,Exist outbound
-$outbound->add($tag,$config,$proxy_settings,$send_through,$mux);
-$outbound->exist($outbound_tag);
-$outbound->get($outbound_tag);
-$outbound->update($outbound_tag, $tag, $config, $proxy_settings, $send_through, $mux);
-$outbound->delete($outbound_tag);
-# List outbound
-$outbound->list();
-#---------------------------------------------------------------------------------
-$config = new \XUI\Xray\Outbound\Protocols\Vmess\Vmess(); // Configured protocol object oriented class 
-$config->settings->add_user(\XUI\Xui::uuid());
-$config->stream_settings->ws_settings(false);
-$tag = 'vmess-test'; // The identifier of this outbound connection
-$proxy_settings = null; // The outbound proxy configuration.
-$send_through = '0.0.0.0'; // The IP address used to send data.
-$mux = []; // Specific configuration related to Mux.
-$outbound_tag = 'vmess-test'; // The identifier of this outbound connection
-```
+    A property to accessing Xray configs **outbounds**.
+    
+    ```php
+    $outbound = $xray->outbound;
+    ```
+    
+    ##### Methods :
+    
+    ```php
+    # Add,Delete,Update,Get,Exist outbound
+    $outbound->add($tag,$config,$proxy_settings,$send_through,$mux);
+    $outbound->exist($outbound_tag);
+    $outbound->get($outbound_tag);
+    $outbound->update($outbound_tag, $tag, $config, $proxy_settings, $send_through, $mux);
+    $outbound->delete($outbound_tag);
+    # List outbound
+    $outbound->list();
+    #---------------------------------------------------------------------------------
+    $config = new \XUI\Xray\Outbound\Protocols\Vmess\Vmess(); // Configured protocol object oriented class 
+    $config->settings->add_user(\XUI\Xui::uuid());
+    $config->stream_settings->ws_settings(false);
+    $tag = 'vmess-test'; // The identifier of this outbound connection
+    $proxy_settings = null; // The outbound proxy configuration.
+    $send_through = '0.0.0.0'; // The IP address used to send data.
+    $mux = []; // Specific configuration related to Mux.
+    $outbound_tag = 'vmess-test'; // The identifier of this outbound connection
+    ```
 
 - #### Routing
 
-A property to accessing Xray configs **routing**.
-
-```php
-$routing = $xray->routing;
-$loaded = $routing->load();
-if($loaded)
-    echo "ok";
-else
-    echo 'error';
-```
-
-> [!Note]
-> Before using routing methods must call `load()` method to load routing configs from xray config!
-
-##### Methods :
-
-```php
-# Set/Get routing domain strategy,domain matcher,balancers
-$routing->domain_strategy();
-$routing->domain_matcher();
-$routing->balancers();
-# Add,Delete,Update,Get,Exist routing rule
-$routing->has_rule($rule_inbound_tag,$rule_outbound_tag);
-$routing->add_rule($rule,$apply);
-$routing->get_rule($rule_inbound_tag,$rule_outbound_tag);
-$routing->update_rule($rule_inbound_tag,$rule_outbound_tag,$rule,$apply);
-$routing->delete_rule($rule_inbound_tag,$rule_outbound_tag,$apply);
-# Apply changes made to routing
-$routing->update();
-#---------------------------------------------------------------------------------
-$rule_inbound_tag = ['inbound-12345','inbound-12346']; // An array where each item represents an identifier.
-$rule_outbound_tag = 'direct'; // Corresponds to the identifier of an outbound.
-$apply = true; // Apply changes to routing in xray config
-$rule = new \XUI\Xray\Routing\Rule($inbound_tag,$outbound_tag); // Configured rule object oriented class
-```
+    A property to accessing Xray configs **routing**.
+    
+    ```php
+    $routing = $xray->routing;
+    $loaded = $routing->load();
+    if($loaded)
+        echo "ok";
+    else
+        echo 'error';
+    ```
+    
+    > [!Note]
+    > Before using routing methods must call `load()` method to load routing configs from xray config!
+    
+    ##### Methods :
+    
+    ```php
+    # Set/Get routing domain strategy,domain matcher,balancers
+    $routing->domain_strategy();
+    $routing->domain_matcher();
+    $routing->balancers();
+    # Add,Delete,Update,Get,Exist routing rule
+    $routing->has_rule($rule_inbound_tag,$rule_outbound_tag);
+    $routing->add_rule($rule,$apply);
+    $routing->get_rule($rule_inbound_tag,$rule_outbound_tag);
+    $routing->update_rule($rule_inbound_tag,$rule_outbound_tag,$rule,$apply);
+    $routing->delete_rule($rule_inbound_tag,$rule_outbound_tag,$apply);
+    # Apply changes made to routing
+    $routing->update();
+    #---------------------------------------------------------------------------------
+    $rule_inbound_tag = ['inbound-12345','inbound-12346']; // An array where each item represents an identifier.
+    $rule_outbound_tag = 'direct'; // Corresponds to the identifier of an outbound.
+    $apply = true; // Apply changes to routing in xray config
+    $rule = new \XUI\Xray\Routing\Rule($inbound_tag,$outbound_tag); // Configured rule object oriented class
+    ```
 
 - #### Reverse
-A property to accessing Xray configs **reverse**.
 
-```php
-$reverse = $xray->reverse;
-$loaded = $reverse->load();
-if($loaded)
-    echo "ok";
-else
-    echo 'error';
-```
+  A property to accessing Xray configs **reverse**.
 
-> [!Note]
-> Before using reverse methods must call `load()` method to load reverse configs from xray config!
+    ```php
+    $reverse = $xray->reverse;
+    $loaded = $reverse->load();
+    if($loaded)
+        echo "ok";
+    else
+        echo 'error';
+    ```
 
-##### Methods :
+  > [!Note]
+  > Before using reverse methods must call `load()` method to load reverse configs from xray config!
 
-```php
-# Add,Delete,Update,Get,Exist reverse portal
-$reverse->has_portal($portal_tag);
-$reverse->add_portal($tag,$domain,$apply);
-$reverse->get_portal($portal_tag);
-$reverse->update_portal($portal_tag,$tag,$domain,$apply);
-$reverse->delete_portal($portal_tag,$apply);
-# Add,Delete,Update,Get,Exist reverse bridge
-$reverse->has_bridge($bridge_tag);
-$reverse->add_bridge($tag,$domain,$apply);
-$reverse->get_bridge($bridge_tag);
-$reverse->update_bridge($bridge_tag,$tag,$domain,$apply);
-$reverse->delete_bridge($bridge_tag,$apply);
-# Apply changes made to reverse
-$reverse->update();
-#---------------------------------------------------------------------------------
-$portal_tag = 'portal-1'; // The identifier for the portal
-$bridge_tag = 'bridge-1'; // The identifier for the bridge
-$tag = 'portal-1'; // The identifier for the portal/bridge
-$domain = 'reverse.xui'; // A domain name.
-$apply = true; // Apply changes to reverse in xray config
-```
+  ##### Methods :
+
+    ```php
+    # Add,Delete,Update,Get,Exist reverse portal
+    $reverse->has_portal($portal_tag);
+    $reverse->add_portal($tag,$domain,$apply);
+    $reverse->get_portal($portal_tag);
+    $reverse->update_portal($portal_tag,$tag,$domain,$apply);
+    $reverse->delete_portal($portal_tag,$apply);
+    # Add,Delete,Update,Get,Exist reverse bridge
+    $reverse->has_bridge($bridge_tag);
+    $reverse->add_bridge($tag,$domain,$apply);
+    $reverse->get_bridge($bridge_tag);
+    $reverse->update_bridge($bridge_tag,$tag,$domain,$apply);
+    $reverse->delete_bridge($bridge_tag,$apply);
+    # Apply changes made to reverse
+    $reverse->update();
+    #---------------------------------------------------------------------------------
+    $portal_tag = 'portal-1'; // The identifier for the portal
+    $bridge_tag = 'bridge-1'; // The identifier for the bridge
+    $tag = 'portal-1'; // The identifier for the portal/bridge
+    $domain = 'reverse.xui'; // A domain name.
+    $apply = true; // Apply changes to reverse in xray config
+    ```
 
 - #### Configs
-- #### Restart
+
+  Use these methods for configuring xray core or get xray core configuration.
+  > [!Note]
+  > You must restart xray to apply changes made to xray configurations. \
+  > Use `set_config()` to apply default xray configuration got from `$xui->panel->default_xray_config()` Or set a full
+  > custom xray configuration.
+
+  ##### Methods
+
+    ```php
+    # Get full Xray configs
+    $xray->get_configs();
+    # Get/Update a Xray config/configs
+    $xray->get_config($config);
+    $xray->update_config($update);
+    # Set a full xray configuration
+    $xray->set_config($full_config);
+    # Restart xray core to apply changes made to xray config
+    $xray->restart();
+    # Get inbound tags
+    $xray->get_inbound_tags();
+    #---------------------------------------------------------------------------------
+    $config = 'log'; // Configuration/Configurations you want to get
+    $update = [
+        'log' => [
+            'access' => 'none',
+            'dnsLog' => false,
+            'error' => '',
+            'loglevel' => 'warning',
+            'maskAddress' => '',
+        ]
+    ]; // Configuration/Configurations you want to made to xray configs
+    $full_config = 'json'; // Json/object/array of xray full config
+    ```
 
 ### Server
 
+A property to accessing server status,panel database,restart/stop xray,xui logs,...
+
+```php
+$server = $xui->server;
+```
+
 - #### Status
+  Use this method to get a full information about server resources and usage of it and information about xray-core.
+    ```php
+    $server->status();
+    ```
 - #### Database
-- #### Xray-Start-Stop
+  Import / Export panel SQLLite database.
+    ```php
+    $server->get_db($path);
+    $server->import_db($path_or_db);
+    #---------------------------------------------------------------------------------
+    $path = '/www/wwwroot/xui.example.com/x-ui.db'; // Path to .db file for exporting panel database
+    $path_or_db = '/www/wwwroot/xui.example.com/x-ui.db'; // Path to .db file of exported panel database
+    ```
+- #### Xray-Restart-Stop
+  Restart / Stop Xray-core
+    ```php
+    $server->restart_xray();
+    $server->stop_xray();
+    ```
+- #### Reality-Certificate
+  Use this method to get a x25519 certificate for reality
+    ```php
+    $server->get_x25519_cert();
+    ```
+- #### Xray-Full-Config
+  Use this method to get xray-core fully config included inbounds,...
+    ```php
+    $server->get_xray_config();
+    ```
 - #### Xui-log
+  Get xui logs
+    ```php
+    $server->get_xui_log($count, $level, $syslog);
+    #---------------------------------------------------------------------------------
+    $count = 10; // Count of logs
+    $level = 'notice'; // Logs level (debug,info,notice,warning,error)
+    $syslog = true; // Enable/Disable syslog output
+    ```
 
 ### Panel
 
+A property to accessing panel settings,restart panel,default xray config.
+
 - #### Settings
+  Methods to get/update 3x-ui panel settings.
+  ##### Methods
+    ```php
+    # Get panel full settings
+    $panel->settings();
+    # Get a setting/ settings from panel settings
+    $panel->get_setting($setting);
+    # Update panel settings
+    $panel->update_setting($update);
+    #---------------------------------------------------------------------------------
+    $setting = 'webPort'; // Specified setting you want to get
+    $update = ['webPort'=>1234]; // Changes you want to made to Panel settings 
+    ```
 - #### Restart
+  Restart 3x-ui panel (Only panel!)
+    ```php
+    $panel->restart();
+    ```
 - #### Default-Xray-Config
+  Get default xray config based on panel and xray-core version. (Only Xray default config!)
+    ```php
+    $panel->default_xray_config();
+    ```
 
 ## Special Thanks to
 
