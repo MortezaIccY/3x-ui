@@ -46,6 +46,7 @@ class Xui
             $this->address = 'https://' . $host . ':' . $port . $uri_path;
         else
             $this->address = 'http://' . $host . ':' . $port . $uri_path;
+        if (!is_dir($cookie_dir)) mkdir($cookie_dir);
         $cookie_path = $cookie_dir . "/$host.cookie";
         if (!file_exists($cookie_path)) {
             touch($cookie_path);
