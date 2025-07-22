@@ -104,46 +104,49 @@ All methods return value based this document :
 > You can set return type from `$output` property in all classes.\
 > You can set it globally when Calling `Xui` Object-oriented class.
 
-  **General structure of recursive methods :**
+**General structure of recursive methods :**
 
   ```php
-    $return = ['ok' => $ok, 'response' => $response, 'size' => $size, 'time_taken' => $time_taken]
-    #---------------------------------------------------------------------------------
-    $ok // Can be true/false based on request success or fail! (bool)
-    $response // response of request returned by panel (string|object|array)
-    $size // Size of response (int)
-    $time_taken // Request time taken in seconds (float)
+  $return = ['ok' => $ok, 'response' => $response, 'size' => $size, 'time_taken' => $time_taken]
+  #---------------------------------------------------------------------------------
+  $ok // Can be true/false based on request success or fail! (bool)
+  $response // response of request returned by panel (string|object|array)
+  $size // Size of response (int)
+  $time_taken // Request time taken in seconds (float)
   ```
 
 - #### Response
 
   We have 3 types of response in methods return value :
-  - Object (Default)
-  - JSON
-  - Array
+    - Object (Default)
+    - JSON
+    - Array
 
 > [!NOTE]\
 > You can set response type from `$response_output` property in all classes.\
 > You can set it globally when Calling `Xui` Object-oriented class.
 
-  **General structure of response :**
+**General structure of response :**
 
   ```php
-    $response = ['success' => $success, 'obj' => $obj, 'msg' => $msg]
-    #---------------------------------------------------------------------------------
-    $success // Can be true/false based on action success or fail! (bool)
-    $obj // data returned. (string|object|array)
-    $msg // Message for fail actions, Similar to error! (string)
+  $response = ['success' => $success, 'obj' => $obj, 'msg' => $msg]
+  #---------------------------------------------------------------------------------
+  $success // Can be true/false based on action success or fail! (bool)
+  $obj // data returned. (string|object|array)
+  $msg // Message for fail actions, Similar to error! (string)
   ```
 
 ### Protocols
+
 You can create a config for inbound/outbound by calling its object-orinted class
 > [!TIP]
 > All variables and properties of protocols and streams classes and methods based on Project X official documentations.\
-> You can find full documentation of protocols and their configuration on [Xtls/Xray official website](https://xtls.github.io/en/)\
+> You can find full documentation of protocols and their configuration
+> on [Xtls/Xray official website](https://xtls.github.io/en/)\
 > [Inbound Protocols Docs](https://xtls.github.io/en/config/inbounds/)\
 > [Outbound Protocols Docs](https://xtls.github.io/en/config/outbounds/)\
 > [Inbound/Outbound Streams Docs](https://xtls.github.io/en/config/transport.html)
+
 ```php
 // Create Inbound config
 use XUI\Xray\Inbound\Protocols\Vmess\Vmess;
@@ -161,7 +164,9 @@ $config->settings->port = 12345;
 $config->settings->add_user($uuid, $security);
 $config->stream_settings->ws_settings($accept_proxy_protocol, $path, $headers);
 ```
+
 Supported Inbound protocols :
+
 - Vmess
 - Vless
 - Trojan
@@ -171,6 +176,7 @@ Supported Inbound protocols :
 - DokodomoDoor
 
 Supported Outbound protocols :
+
 - Vmess
 - Vless
 - Trojan
@@ -182,6 +188,7 @@ Supported Outbound protocols :
 - Freedom
 
 Supported Inbound/Outbound Streams and Security :
+
 - tcp
 - kcp
 - ws
@@ -221,10 +228,10 @@ $response_output = \XUI\Xui::OUTPUT_OBJECT; // Type of response value of request
 > Library automatically use cookie if login recently
 
   ```php
-    $xui->login($username,$password);
-    #---------------------------------------------------------------------------------
-    $username = 'admin'; // Panel login username
-    $password = 'xxxx'; // Panel login password
+  $xui->login($username,$password);
+  #---------------------------------------------------------------------------------
+  $username = 'admin'; // Panel login username
+  $password = 'xxxx'; // Panel login password
   ```
 
 - #### Random
@@ -342,25 +349,25 @@ $xray = $xui->xray;
 
 ##### Methods
 
-    ```php
-    # Set/Get routing domain strategy,domain matcher,balancers
-    $routing->domain_strategy();
-    $routing->domain_matcher();
-    $routing->balancers();
-    # Add,Delete,Update,Get,Exist routing rule
-    $routing->has_rule($rule_inbound_tag,$rule_outbound_tag);
-    $routing->add_rule($rule,$apply);
-    $routing->get_rule($rule_inbound_tag,$rule_outbound_tag);
-    $routing->update_rule($rule_inbound_tag,$rule_outbound_tag,$rule,$apply);
-    $routing->delete_rule($rule_inbound_tag,$rule_outbound_tag,$apply);
-    # Apply changes made to routing
-    $routing->update();
-    #---------------------------------------------------------------------------------
-    $rule_inbound_tag = ['inbound-12345','inbound-12346']; // An array where each item represents an identifier.
-    $rule_outbound_tag = 'direct'; // Corresponds to the identifier of an outbound.
-    $apply = true; // Apply changes to routing in xray config
-    $rule = new \XUI\Xray\Routing\Rule($inbound_tag,$outbound_tag); // Configured rule object oriented class
-    ```
+  ```php
+  # Set/Get routing domain strategy,domain matcher,balancers
+  $routing->domain_strategy();
+  $routing->domain_matcher();
+  $routing->balancers();
+  # Add,Delete,Update,Get,Exist routing rule
+  $routing->has_rule($rule_inbound_tag,$rule_outbound_tag);
+  $routing->add_rule($rule,$apply);
+  $routing->get_rule($rule_inbound_tag,$rule_outbound_tag);
+  $routing->update_rule($rule_inbound_tag,$rule_outbound_tag,$rule,$apply);
+  $routing->delete_rule($rule_inbound_tag,$rule_outbound_tag,$apply);
+  # Apply changes made to routing
+  $routing->update();
+  #---------------------------------------------------------------------------------
+  $rule_inbound_tag = ['inbound-12345','inbound-12346']; // An array where each item represents an identifier.
+  $rule_outbound_tag = 'direct'; // Corresponds to the identifier of an outbound.
+  $apply = true; // Apply changes to routing in xray config
+  $rule = new \XUI\Xray\Routing\Rule($inbound_tag,$outbound_tag); // Configured rule object oriented class
+  ```
 
 - #### Reverse
 
@@ -380,28 +387,28 @@ $xray = $xui->xray;
 
 ##### Methods
 
-    ```php
-    # Add,Delete,Update,Get,Exist reverse portal
-    $reverse->has_portal($portal_tag);
-    $reverse->add_portal($tag,$domain,$apply);
-    $reverse->get_portal($portal_tag);
-    $reverse->update_portal($portal_tag,$tag,$domain,$apply);
-    $reverse->delete_portal($portal_tag,$apply);
-    # Add,Delete,Update,Get,Exist reverse bridge
-    $reverse->has_bridge($bridge_tag);
-    $reverse->add_bridge($tag,$domain,$apply);
-    $reverse->get_bridge($bridge_tag);
-    $reverse->update_bridge($bridge_tag,$tag,$domain,$apply);
-    $reverse->delete_bridge($bridge_tag,$apply);
-    # Apply changes made to reverse
-    $reverse->update();
-    #---------------------------------------------------------------------------------
-    $portal_tag = 'portal-1'; // The identifier for the portal
-    $bridge_tag = 'bridge-1'; // The identifier for the bridge
-    $tag = 'portal-1'; // The identifier for the portal/bridge
-    $domain = 'reverse.xui'; // A domain name.
-    $apply = true; // Apply changes to reverse in xray config
-    ```
+  ```php
+  # Add,Delete,Update,Get,Exist reverse portal
+  $reverse->has_portal($portal_tag);
+  $reverse->add_portal($tag,$domain,$apply);
+  $reverse->get_portal($portal_tag);
+  $reverse->update_portal($portal_tag,$tag,$domain,$apply);
+  $reverse->delete_portal($portal_tag,$apply);
+  # Add,Delete,Update,Get,Exist reverse bridge
+  $reverse->has_bridge($bridge_tag);
+  $reverse->add_bridge($tag,$domain,$apply);
+  $reverse->get_bridge($bridge_tag);
+  $reverse->update_bridge($bridge_tag,$tag,$domain,$apply);
+  $reverse->delete_bridge($bridge_tag,$apply);
+  # Apply changes made to reverse
+  $reverse->update();
+  #---------------------------------------------------------------------------------
+  $portal_tag = 'portal-1'; // The identifier for the portal
+  $bridge_tag = 'bridge-1'; // The identifier for the bridge
+  $tag = 'portal-1'; // The identifier for the portal/bridge
+  $domain = 'reverse.xui'; // A domain name.
+  $apply = true; // Apply changes to reverse in xray config
+  ```
 
 - #### Configs
 
@@ -414,31 +421,31 @@ $xray = $xui->xray;
 
 ##### Methods
 
-    ```php
-    # Get full Xray configs
-    $xray->get_configs();
-    # Get/Update a Xray config/configs
-    $xray->get_config($config);
-    $xray->update_config($update);
-    # Set a full xray configuration
-    $xray->set_config($full_config);
-    # Restart xray core to apply changes made to xray config
-    $xray->restart();
-    # Get inbound tags
-    $xray->get_inbound_tags();
-    #---------------------------------------------------------------------------------
-    $config = 'log'; // Configuration/Configurations you want to get
-    $update = [
-        'log' => [
-            'access' => 'none',
-            'dnsLog' => false,
-            'error' => '',
-            'loglevel' => 'warning',
-            'maskAddress' => '',
-        ]
-    ]; // Configuration/Configurations you want to made to xray configs
-    $full_config = 'json'; // Json/object/array of xray full config
-    ```
+  ```php
+  # Get full Xray configs
+  $xray->get_configs();
+  # Get/Update a Xray config/configs
+  $xray->get_config($config);
+  $xray->update_config($update);
+  # Set a full xray configuration
+  $xray->set_config($full_config);
+  # Restart xray core to apply changes made to xray config
+  $xray->restart();
+  # Get inbound tags
+  $xray->get_inbound_tags();
+  #---------------------------------------------------------------------------------
+  $config = 'log'; // Configuration/Configurations you want to get
+  $update = [
+      'log' => [
+          'access' => 'none',
+          'dnsLog' => false,
+          'error' => '',
+          'loglevel' => 'warning',
+          'maskAddress' => '',
+      ]
+  ]; // Configuration/Configurations you want to made to xray configs
+  $full_config = 'json'; // Json/object/array of xray full config
+  ```
 
 ### Server
 
