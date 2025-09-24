@@ -392,11 +392,10 @@ class Inbound
      * @param string $email
      * @param int|null $total_traffic
      * @param int|string|null $expiry_time
-     * @param int|null $telegram_id
-     * @param int|null $subscription_id
+     * @param bool $status
      * @return string|array|object
      */
-    public function update_client(int $inbound_id, string $client_id, string $email, int $total_traffic = 0, bool $enable = true): string|array|object
+    public function update_client(int $inbound_id, string $client_id, string $email, int|null $total_traffic = 0, int|string|null $expiry_time = 0, bool $status = true): string|array|object
     {
         $st = microtime(true);
         $settings = [
@@ -405,7 +404,8 @@ class Inbound
                     'id' => $client_id,
                     'email' => $email,
                     'totalGB' => $total_traffic,
-                    'enable' => $enable
+                    'expiryTime' => $expiry_time * 1000,
+                    'enable' => $status
                 ]
             ]
         ];
