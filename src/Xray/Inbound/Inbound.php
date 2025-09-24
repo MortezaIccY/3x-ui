@@ -404,7 +404,7 @@ class Inbound
                     'id' => $client_id,
                     'email' => $email,
                     'totalGB' => $total_traffic,
-                    'expiryTime' => $expiry_time * 1000,
+                    'expiryTime' => $expiry_time,
                     'enable' => $status
                 ]
             ]
