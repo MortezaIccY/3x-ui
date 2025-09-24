@@ -431,6 +431,32 @@ class Inbound
     }
 
     /**
+     * Delete a client from an inbound
+     * @param int $inbound_id
+     * @param string $client_uuid
+     * @return object|array|string
+     */
+    public function delete_client(int $inbound_id, string $client_uuid): object|array|string
+    {
+        $st = microtime(true);
+
+        try {
+            $result = $this->guzzle->post("panel/inbound/$inbound_id/delClient/$client_uuid");
+            $body = $result->getBody();
+            $response = $this->response_output($body->getContents());
+            $et = microtime(true);
+            $tt = round($et - $st, 3);
+            $return = ['ok' => true, 'response' => $response, 'size' => $body->getSize(), 'time_taken' => $tt];
+        } catch (GuzzleException $err) {
+            $error_code = $err->getCode();
+            $error = $err->getMessage();
+            $return = ['ok' => false, 'error_code' => $error_code, 'error' => $error];
+        }
+
+        return $this->output($return);
+    }
+
+    /**
      * Export an inbound.\
      * Only return json encoded exported inbound in `response`!
      * @param int $inbound_id
