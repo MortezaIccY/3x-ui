@@ -361,6 +361,7 @@ class Inbound
                     'email' => $email,
                     'totalGB' => $total_traffic,
                     'expiryTime' => $expiry_time * 1000,
+                    'enable' => true,
                     'tgId' => $telegram_id,
                     'subId' => $subscription_id
                 ]
